@@ -42,6 +42,9 @@ public class TrackRenderer : MonoBehaviour
         _lr.useWorldSpace   = true;
         _lr.sortingOrder    = -1;
 
+        if (_track.Count < 2)
+            return;
+
         int n = _track.Count;
         _lr.positionCount = n;
         for (int i = 0; i < n; i++)

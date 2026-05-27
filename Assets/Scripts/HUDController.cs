@@ -29,15 +29,15 @@ public class HUDController : MonoBehaviour
     public float popupDuration = 1.2f;
 
     // ── Private refs ──────────────────────────────────────────────────────────
-    private CarController2 _car;
+    private CarController _car;
     private EconomyManager _eco;
     private float          _popupTimer;
     private bool           _hintShown = true;
 
     private void Start()
     {
-        _car = FindObjectOfType<CarController2>();
-        _eco = FindObjectOfType<EconomyManager>();
+        _car = FindAnyObjectByType<CarController>();
+        _eco = FindAnyObjectByType<EconomyManager>();
 
         if (_eco != null)
             _eco.OnCoinsChanged += OnCoinsChanged;

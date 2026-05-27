@@ -13,16 +13,15 @@ public class EconomyManager : MonoBehaviour
     public int  Coins { get; private set; }
     public System.Action<int, int> OnCoinsChanged;   // (newTotal, delta)
 
-    private CarController2 _car;
+    private CarController _car;
 
-    private void Start()
+    private void Awake()
     {
-        // CarController2 is added dynamically by CarTrackBridge, so find in Start not Awake
-        _car = FindObjectOfType<CarController2>();
+        _car = FindAnyObjectByType<CarController>();
         if (_car != null)
             _car.OnLapCompleted += AwardLap;
         else
-            Debug.LogWarning("[EconomyManager] CarController2 not found.");
+            Debug.LogWarning("[EconomyManager] CarController not found.");
     }
 
     private void OnDestroy()
