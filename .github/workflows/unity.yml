@@ -28,7 +28,8 @@ jobs:
           path: Library
           key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
 
-      - name: Unity Build
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      - name: Run Unity Tests 
+        uses: game-ci/unity-test-runner@v4 
+        env: 
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }} 
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
