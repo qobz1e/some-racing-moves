@@ -1,17 +1,14 @@
 using UnityEngine;
 
-/// <summary>
-/// Handles the coin economy.
-/// Listens to CarController2.OnLapCompleted and awards coinsPerLap.
-/// No persistence between sessions – raw prototype.
-/// </summary>
 public class EconomyManager : MonoBehaviour
 {
+    [SerializeField] private UpgradeManager upgradeManager;
+
     [Header("Rewards")]
-    public int coinsPerLap = 10;
+    public int coinsPerLap = 100;
 
     public int  Coins { get; private set; }
-    public System.Action<int, int> OnCoinsChanged;   // (newTotal, delta)
+    public System.Action<int, int> OnCoinsChanged;
 
     private CarController _car;
 
@@ -32,9 +29,14 @@ public class EconomyManager : MonoBehaviour
 
     private void AwardLap()
     {
-        Coins += coinsPerLap;
-        OnCoinsChanged?.Invoke(Coins, coinsPerLap);
-        Debug.Log($"[Economy] Lap! +{coinsPerLap} → total {Coins}");
+        int reward = Mathf.RoundToInt(
+            coinsPerLap * upgradeManager.lapMoneyMultiplier
+        ); 
+
+        Coins += reward;
+
+        OnCoinsChanged?.Invoke(Coins, reward);
+        Debug.Log($"[Economy] Lap! +{reward} → total {Coins}");
     }
 
     public void AddCoins(int amount)

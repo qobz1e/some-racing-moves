@@ -110,7 +110,12 @@ public class HUDController : MonoBehaviour
     private void ShowCoinPopup(int delta)
     {
         if (!txtCoinPopup) return;
-        txtCoinPopup.text = $"+{delta}";
+
+        if (delta > 0)
+            txtCoinPopup.text = $"+{delta}";
+        else
+            txtCoinPopup.text = $"{delta}";
+
         txtCoinPopup.gameObject.SetActive(true);
         _popupTimer = popupDuration;
     }

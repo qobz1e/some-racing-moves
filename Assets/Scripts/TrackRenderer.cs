@@ -1,16 +1,11 @@
 using UnityEngine;
 
-/// <summary>
-/// Renders the track visually using a LineRenderer.
-/// Also draws checkered finish line at waypoint[0].
-/// Attach to the same GameObject as TrackData.
-/// </summary>
 [RequireComponent(typeof(TrackData))]
 public class TrackRenderer : MonoBehaviour
 {
     [Header("Line Renderer settings")]
     public float lineWidth = 1.2f;
-    public Material lineMaterial;          // assign "Sprites/Default" in Inspector
+    public Material lineMaterial;
     public Color trackColor = new Color(0.2f, 0.2f, 0.2f, 1f);
 
     [Header("Finish line")]

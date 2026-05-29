@@ -8,14 +8,15 @@ public class DriftUI : MonoBehaviour
     [SerializeField] private GameObject root;
 
     [Header("Wheel")]
+    [SerializeField] private RectTransform ring;
     [SerializeField] private RectTransform needle;
-
     [SerializeField] private Image successZone;
-
     [SerializeField] private TMP_Text multiplierText;
 
+    [SerializeField] private TMP_Text failText;
+
     [Header("Spin")]
-    [SerializeField] private float spinSpeed = 540f;
+    [SerializeField] private float spinSpeed = 450f;
 
     [Header("Success Zone")]
     [Range(0f, 360f)]
@@ -33,21 +34,27 @@ public class DriftUI : MonoBehaviour
     private void Start()
     {
         BuildSuccessZoneVisual();
-
-        Hide();
     }
 
     // ─────────────────────────────────────────────────────────────
 
     public void Show()
     {
-        currentAngle = 90f;
+        currentAngle = 0f;
 
         DidFullRotation = false;
 
         UpdateNeedle();
 
         root.SetActive(true);
+
+        // Restore normal drift UI
+        ring.gameObject.SetActive(true);
+        successZone.gameObject.SetActive(true); 
+        needle.gameObject.SetActive(true);
+        multiplierText.gameObject.SetActive(true);
+
+        failText.gameObject.SetActive(false);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -67,9 +74,9 @@ public class DriftUI : MonoBehaviour
             spinSpeed *
             Time.unscaledDeltaTime;
 
-        if (currentAngle >= 450f)
+        if (currentAngle >= 360f)
         {
-            currentAngle -= 450f;
+            currentAngle -= 360f;
 
             DidFullRotation = true;
         }
@@ -88,7 +95,7 @@ public class DriftUI : MonoBehaviour
             Quaternion.Euler(
                 0,
                 0,
-                -currentAngle
+                -(currentAngle + 90)
             );
     }
 
@@ -105,20 +112,8 @@ public class DriftUI : MonoBehaviour
         float max =
             successCenter + half;
 
-        if (min < 0f)
-        {
-            return currentAngle >= 360f + min ||
-                   currentAngle <= max;
-        }
-
-        if (max > 360f)
-        {
-            return currentAngle >= min ||
-                   currentAngle <= max - 360f;
-        }
-
-        return currentAngle >= min &&
-               currentAngle <= max;
+        return currentAngle - 270 >= min &&
+               currentAngle - 270 <= max;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -129,7 +124,7 @@ public class DriftUI : MonoBehaviour
 
         DidFullRotation = false;
 
-        UpdateNeedle();
+        RotateNeedle();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -140,6 +135,29 @@ public class DriftUI : MonoBehaviour
             return;
 
         multiplierText.text = "x" + value;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+
+    public void ShowFailOnly(string message)
+    {
+        root.SetActive(true);
+
+        ring.gameObject.SetActive(false);
+        successZone.gameObject.SetActive(false);
+        needle.gameObject.SetActive(false);
+        multiplierText.gameObject.SetActive(false);
+
+        failText.text = message;
+        failText.gameObject.SetActive(true);
+    }
+
+
+    public void HideFailReason() 
+    { 
+        if (failText == null) return; 
+
+        failText.gameObject.SetActive(false); 
     }
 
     // ─────────────────────────────────────────────────────────────

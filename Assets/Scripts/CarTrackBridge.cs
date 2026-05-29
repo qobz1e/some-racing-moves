@@ -1,13 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Bridge component that lives on the Car GameObject.
-/// It copies the TrackData reference to CarController at runtime,
-/// so the car and the track can be separate GameObjects.
-///
-/// Attach this alongside CarController on the Car GO.
-/// Assign trackGO in the Inspector (or via SceneBootstrap).
-/// </summary>
 public class CarTrackBridge : MonoBehaviour
 {
     [Tooltip("The GameObject that has TrackData on it.")]

@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class CarController : MonoBehaviour
 {
+    [SerializeField] private UpgradeManager upgradeManager;
+
     [Header("Speed")]
     public float maxSpeed = 6f;
     public float deceleration = 4f;
@@ -29,9 +31,8 @@ public class CarController : MonoBehaviour
 
     public bool IsTurning { get; private set; }
     private bool driftVisualActive;
-private float driftVisualAngleCurrent;
+    private float driftVisualAngleCurrent;
 
-    // 🔥 НОВОЕ: реальный стейт дрифта
     public bool IsDrifting { get; set; }
 
     private TrackData _track;
@@ -83,13 +84,16 @@ private float driftVisualAngleCurrent;
 
     private void HandleInput()
     {
+        if (IsDrifting)
+            return;
+
         if (WasTapped())
         {
             _hasStarted = true;
 
             CurrentSpeed += tapBoost;
 
-            CurrentSpeed = Mathf.Clamp(CurrentSpeed, 0f, maxSpeed);
+            CurrentSpeed = Mathf.Clamp(CurrentSpeed, 0f, maxSpeed * upgradeManager.speedMultiplier);
         }
     }
 

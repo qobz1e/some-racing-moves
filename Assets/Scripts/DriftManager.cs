@@ -6,6 +6,7 @@ public class DriftManager : MonoBehaviour
     [SerializeField] private CarController car;
     [SerializeField] private DriftUI ui;
     [SerializeField] private EconomyManager economy;
+    [SerializeField] private UpgradeManager upgradeManager;
 
     [Header("Rewards")]
     public int baseReward = 10;
@@ -23,7 +24,8 @@ public class DriftManager : MonoBehaviour
     {
         None,
         BadTap,
-        FullRotation
+        FullRotation,
+        ZoneEnd
     }
 
     private DriftEndReason endReason;
@@ -52,7 +54,7 @@ public class DriftManager : MonoBehaviour
     {
         if (driftLocked) return;
 
-        if (car.IsTurning && car.CurrentSpeed > 1f)
+        if (car.IsTurning && car.CurrentSpeed > car.maxSpeed * upgradeManager.speedMultiplier * 0.4f)
         {
             cooldown = 0.2f;
 
@@ -64,7 +66,7 @@ public class DriftManager : MonoBehaviour
             cooldown -= Time.unscaledDeltaTime;
 
             if (cooldown <= 0f && drifting)
-                EndDrift(DriftEndReason.BadTap);
+                EndDrift(DriftEndReason.ZoneEnd);
         }
     }
 
@@ -103,6 +105,10 @@ public class DriftManager : MonoBehaviour
 
                 int reward = baseReward * multiplier;
 
+                reward = Mathf.RoundToInt(
+                    reward * upgradeManager.driftMoneyMultiplier
+                ); 
+                
                 economy.AddCoins(reward);
 
                 Debug.Log("DRIFT + " + reward);
@@ -130,12 +136,39 @@ public class DriftManager : MonoBehaviour
 
         Debug.Log("DRIFT END: " + reason);
 
-        car.EndDrift();
+        string failMessage = ""; 
 
-        ui.Hide();
+        switch (reason) 
+        { 
+            case DriftEndReason.BadTap: 
+                failMessage = "WRONG PLACE TAP"; 
+                break; 
+
+            case DriftEndReason.FullRotation: 
+                failMessage = "MISSED SUCCESS ZONE"; 
+                break;
+        }
+
+        if (reason != DriftEndReason.ZoneEnd)
+        {
+            ui.ShowFailOnly(failMessage);
+
+            Invoke(nameof(HideDriftUI), 0.5f);
+        }
+        else
+        {
+            ui.Hide();
+        }
+
+        car.EndDrift();
 
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
+    }
+
+    void HideDriftUI()
+    {
+        ui.Hide();
     }
 
     static bool WasTapped()

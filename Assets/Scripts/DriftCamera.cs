@@ -6,10 +6,10 @@ public class DriftCamera : MonoBehaviour
     [SerializeField] private Transform target;
 
     [Header("Normal")]
-    [SerializeField] private float normalSize = 16f;
+    [SerializeField] private float normalSize = 10f;
 
     [Header("Drift")]
-    [SerializeField] private float driftSize = 8f;
+    [SerializeField] private float driftSize = 6f;
 
     [SerializeField] private float smooth = 4f;
 

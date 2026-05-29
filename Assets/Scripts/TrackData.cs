@@ -7,25 +7,29 @@ public class TrackData : MonoBehaviour
     [Header("Control Points")]
     public Vector3[] controlPoints =
     {
-        new Vector3(-18, -10),
-        new Vector3(-18, -2),
-        new Vector3(-18,  8),
+        new Vector3(-21, 9),
 
-        new Vector3(-8,  8),
+        new Vector3(-6, 9),
 
-        new Vector3( 6,  8),
-        new Vector3(16,  8),
+        new Vector3(-6,  -3),
 
-        new Vector3(16, -2),
-        new Vector3(16, -12),
+        new Vector3(12,  3),
 
-        new Vector3( 4, -12),
+        new Vector3(15,  -6),
 
-        new Vector3(-6, -12),
+        new Vector3(21,  -3),
 
-        new Vector3(-6, -2),
+        new Vector3(21, -12),
 
-        new Vector3(-18, -2),
+        new Vector3(6, -15),
+
+        new Vector3(-12, -15),
+
+        new Vector3(-15, -9),
+
+        new Vector3(-24, -9),
+
+        new Vector3(-24, 0)
     };
 
     [Header("Spline")]
