@@ -15,6 +15,8 @@ public class CarController : MonoBehaviour
 
     [Header("Drift")]
     public float traction = 0.1f;
+    [SerializeField] private TrailRenderer leftTrail;
+    [SerializeField] private TrailRenderer rightTrail;
 
     [SerializeField] private float wallBounce = 0.5f;
 
@@ -43,6 +45,20 @@ public class CarController : MonoBehaviour
         HandleDrag(); 
         HandleDriftPhysics();
         Move();
+
+        void UpdateSkidMarks()
+        {
+            bool showSkid =
+                IsDrifting && moveForce.magnitude > 2f;
+
+            if (leftTrail != null)
+                leftTrail.emitting = showSkid;
+
+            if (rightTrail != null)
+                rightTrail.emitting = showSkid;
+        }
+
+        UpdateSkidMarks();
     }
 
     // ─────────────────────────────
