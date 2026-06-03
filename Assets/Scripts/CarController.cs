@@ -5,245 +5,150 @@ public class CarController : MonoBehaviour
 {
     [SerializeField] private UpgradeManager upgradeManager;
 
-    [Header("Speed")]
+    [Header("Movement")]
+    public float acceleration = 15f;
     public float maxSpeed = 6f;
-    public float deceleration = 4f;
+    public float drag = 2f;
 
-    [Header("Tap Control")]
-    public float tapBoost = 2f;
+    [Header("Steering")]
+    public float steerAngle = 30f;
 
-    [Header("Waypoint Following")]
-    public float waypointReachDist = 0.5f;
-    public float rotationSpeed = 360f;
+    [Header("Drift")]
+    public float traction = 0.1f;
 
-    [Header("Drift Visual")]
-    [SerializeField] private Transform visual;
-    [SerializeField] private float driftVisualAngle = 45f;
-    [SerializeField] private float driftVisualSmooth = 480f;
+    [SerializeField] private float wallBounce = 0.5f;
+
+    private Vector2 moveForce;
+
+    float Accel => acceleration * upgradeManager.speedMultiplier;
+
+    public float CurrentSpeed => moveForce.magnitude;
+
+    public float MaxSpeed => maxSpeed * upgradeManager.speedMultiplier;
+
+    public bool IsDrifting { get; private set; }
+
+    public float DriftAngle { get; private set; }
+
+    private float driftGraceTimer;
+
+    public int LapCount { get; private set; }
 
     public System.Action OnLapCompleted;
 
-    public float CurrentSpeed { get; private set; }
-    public float MaxSpeed => maxSpeed;
-
-    public int LapCount { get; private set; }
-    public int CurrentWaypoint { get; private set; }
-
-    public bool IsTurning { get; private set; }
-    private bool driftVisualActive;
-    private float driftVisualAngleCurrent;
-
-    public bool IsDrifting { get; set; }
-
-    private TrackData _track;
-
-    private bool _hasStarted;
-    private bool _passedFirstWP;
-
-    private float currentDriftAngle;
-    private float driftDirection;
-    private float driftPower = 1f;
-
-    // ─────────────────────────────────────────────
-
-    public void SetTrack(TrackData td)
+    void Update()
     {
-        _track = td;
-
-        if (_track == null || _track.Count < 2)
-            return;
-
-        transform.position = _track.Get(0);
-
-        CurrentWaypoint = 0;
-
-        Vector3 dir = _track.GetDirection(0);
-
-        if (dir != Vector3.zero)
-            transform.up = dir;
+        HandleAcceleration();
+        HandleSteering();
+        HandleDrag(); 
+        HandleDriftPhysics();
+        Move();
     }
 
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────
 
-    private void Update()
+    void HandleAcceleration()
     {
-        if (_track == null || _track.Count < 2)
-            return;
-
-        HandleInput();
-        HandleSpeed();
-
-        if (!_hasStarted || CurrentSpeed <= 0f)
-            return;
-
-        MoveAlongTrack();
-        UpdateDriftVisual();
-    }
-
-    // ─────────────────────────────────────────────
-
-    private void HandleInput()
-    {
-        if (IsDrifting)
-            return;
-
-        if (WasTapped())
+        if (Keyboard.current.spaceKey.isPressed)
         {
-            _hasStarted = true;
-
-            CurrentSpeed += tapBoost;
-
-            CurrentSpeed = Mathf.Clamp(CurrentSpeed, 0f, maxSpeed * upgradeManager.speedMultiplier);
+            moveForce +=
+                (Vector2)transform.up *
+                Accel *
+                Time.deltaTime;
         }
+
+        moveForce =
+            Vector2.ClampMagnitude(moveForce, MaxSpeed);
     }
 
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────
 
-    private void HandleSpeed()
+    void HandleSteering()
     {
-        if (IsDrifting)
-            return;
+        float steerInput = 0f;
 
-        CurrentSpeed = Mathf.MoveTowards(
-            CurrentSpeed,
-            0f,
-            deceleration * Time.deltaTime
+        if (Keyboard.current.aKey.isPressed)
+            steerInput = 1f;
+
+        if (Keyboard.current.dKey.isPressed)
+            steerInput = -1f;
+
+        transform.Rotate(
+            Vector3.forward,
+            steerInput *
+            moveForce.magnitude *
+            steerAngle *
+            Time.deltaTime
         );
     }
 
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────
 
-    private void MoveAlongTrack()
+    void HandleDrag()
     {
-        Vector3 target = _track.Get(CurrentWaypoint + 1);
-        Vector3 dir = target - transform.position;
-        float dist = dir.magnitude;
+        float dt = Time.deltaTime;
 
-        Vector3 currentSegmentDir = _track.GetDirection(CurrentWaypoint);
-        Vector3 nextSegmentDir = _track.GetDirection(CurrentWaypoint + 1);
+        float decay = Mathf.Clamp01(drag * dt);
 
-        float cross = Vector3.Cross(currentSegmentDir, nextSegmentDir).z;
+        moveForce = Vector2.Lerp(moveForce, Vector2.zero, decay);
+    }
 
-        driftDirection = Mathf.Sign(cross);
+    // ─────────────────────────────
 
-        float cornerAngle = Vector3.Angle(currentSegmentDir, nextSegmentDir);
+    void HandleDriftPhysics()
+    {
+        Vector2 forward = transform.up;
 
-        // ❗ НЕ используем IsTurning для дрифта теперь как триггер
-        IsTurning = cornerAngle > 10f && dist < 2.0f;
-
-        if (dist <= waypointReachDist)
+        if (moveForce.sqrMagnitude < 0.01f)
         {
-            AdvanceWaypoint();
+            DriftAngle = 0f;
+            IsDrifting = false;
+            driftGraceTimer = 0f;
             return;
         }
 
-        dir.Normalize();
+        DriftAngle =
+            Vector2.SignedAngle(forward, moveForce.normalized);
 
-        transform.position += dir * CurrentSpeed * Time.deltaTime;
+        bool driftingNow =
+            moveForce.magnitude > 2f &&
+            Mathf.Abs(DriftAngle) > 15f;
 
-        float targetAngle =
-            Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
+        if (driftingNow)
+            driftGraceTimer = 0.3f;
+        else
+            driftGraceTimer -= Time.deltaTime;
 
-        float angle = Mathf.MoveTowardsAngle(
-            transform.eulerAngles.z,
-            targetAngle,
-            rotationSpeed * Time.deltaTime
-        );
+        IsDrifting = driftGraceTimer > 0f;
 
-        transform.eulerAngles = new Vector3(0, 0, angle);
-
-        if (visual != null)
-        {
-            float driftOffset = 0f;
-
-            if (IsDrifting && IsTurning)
-                driftOffset = driftVisualAngle * driftDirection * driftPower;
-
-            visual.localEulerAngles = new Vector3(0, 0, driftOffset);
-        }
+        moveForce =
+            Vector2.Lerp(
+                moveForce,
+                forward * moveForce.magnitude,
+                traction * Time.deltaTime
+            );
     }
 
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────
 
-    private void UpdateDriftVisual()
+    void Move()
     {
-        if (visual == null)
-            return;
-
-        float targetDrift =
-            IsDrifting ? driftVisualAngle * driftDirection * driftPower : 0f;
-
-        currentDriftAngle = Mathf.MoveTowards(
-            currentDriftAngle,
-            targetDrift,
-            driftVisualSmooth * Time.deltaTime
-        );
-
-        visual.localEulerAngles = new Vector3(0, 0, currentDriftAngle);
+        transform.position += (Vector3)moveForce * Time.deltaTime;
     }
 
-    private float GetDriftOffset()
-    {
-        if (!IsDrifting)
-            return 0f;
+    // ─────────────────────────────
 
-        return driftVisualAngle * driftDirection * driftPower;
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        Vector2 normal = col.contacts[0].normal;
+        moveForce = Vector2.Reflect(moveForce, normal) * wallBounce;
     }
 
-    public void BeginDrift()
+    // ─────────────────────────────
+
+    public void CompleteLap()
     {
-        IsDrifting = true;
-    }
-
-    public void EndDrift()
-    {
-        IsDrifting = false;
-    }
-
-    public void SetDriftPower(int multiplier)
-    {
-        driftPower =
-            Mathf.Clamp(1f + multiplier * 0.15f, 1f, 2f);
-    }
-
-    // ─────────────────────────────────────────────
-
-    private void AdvanceWaypoint()
-    {
-        if (_track == null || _track.Count == 0)
-            return;
-
-        int next = (CurrentWaypoint + 1) % _track.Count;
-
-        if (CurrentWaypoint == 0 && next == 1)
-            _passedFirstWP = true;
-
-        if (next == 0 && _passedFirstWP)
-        {
-            LapCount++;
-            _passedFirstWP = false;
-            OnLapCompleted?.Invoke();
-        }
-
-        CurrentWaypoint = next;
-    }
-
-    // ─────────────────────────────────────────────
-
-    private static bool WasTapped()
-    {
-        bool keyboard =
-            Keyboard.current != null &&
-            Keyboard.current.spaceKey.wasPressedThisFrame;
-
-        bool mouse =
-            Mouse.current != null &&
-            Mouse.current.leftButton.wasPressedThisFrame;
-
-        bool touch =
-            Touchscreen.current != null &&
-            Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
-
-        return keyboard || mouse || touch;
+        LapCount++;
+        OnLapCompleted?.Invoke();
     }
 }

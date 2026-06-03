@@ -1,180 +1,98 @@
-﻿using UnityEngine;
-using UnityEngine.InputSystem;
+﻿using TMPro;
+using UnityEngine;
 
 public class DriftManager : MonoBehaviour
 {
     [SerializeField] private CarController car;
-    [SerializeField] private DriftUI ui;
     [SerializeField] private EconomyManager economy;
-    [SerializeField] private UpgradeManager upgradeManager;
+    [SerializeField] private UpgradeManager upgrades;
 
-    [Header("Rewards")]
-    public int baseReward = 10;
+    [Header("UI")]
+    [SerializeField] private TMP_Text driftText;
 
-    [Header("Slow Motion")]
-    public float slowMo = 0.3f;
+    [Header("Reward")]
+    public float rewardInterval = 1f;
+    public int baseReward = 5;
 
-    bool drifting;
-    bool driftLocked;
+    [Header("Combo")]
+    public float comboDecayTime = 1.2f;
 
-    int multiplier = 0;
-    float cooldown;
+    private float rewardTimer;
+    private float comboTimer;
 
-    private enum DriftEndReason
-    {
-        None,
-        BadTap,
-        FullRotation,
-        ZoneEnd
-    }
-
-    private DriftEndReason endReason;
+    private int combo = 0;
+    private bool wasDrifting;
 
     void Update()
     {
-        if (!car) return;
+        if (car == null) return;
 
-        HandleLockReset();
-        HandleState();
-
-        if (drifting)
-            TickDrift();
+        HandleDrift();
+        UpdateUI();
     }
 
-    void HandleLockReset()
+    void HandleDrift()
     {
-        if (!car.IsTurning && driftLocked)
+        if (car.IsDrifting)
         {
-            driftLocked = false;
-            endReason = DriftEndReason.None;
-        }
-    }
+            // старт дрифта
+            if (!wasDrifting)
+            {
+                combo = 1;
+                rewardTimer = rewardInterval;
+                comboTimer = comboDecayTime;
+            }
 
-    void HandleState()
-    {
-        if (driftLocked) return;
+            // таймер награды
+            rewardTimer -= Time.deltaTime;
 
-        if (car.IsTurning && car.CurrentSpeed > car.maxSpeed * upgradeManager.speedMultiplier * 0.4f)
-        {
-            cooldown = 0.2f;
+            if (rewardTimer <= 0f)
+            {
+                rewardTimer = rewardInterval;
 
-            if (!drifting)
-                StartDrift();
+                int reward =
+                    Mathf.RoundToInt(
+                        baseReward *
+                        combo *
+                        upgrades.driftMoneyMultiplier
+                    );
+
+                economy.AddCoins(reward);
+
+                combo++;
+                comboTimer = comboDecayTime;
+            }
+
+            // удержание комбо
+            comboTimer = comboDecayTime;
         }
         else
         {
-            cooldown -= Time.unscaledDeltaTime;
+            comboTimer -= Time.deltaTime;
 
-            if (cooldown <= 0f && drifting)
-                EndDrift(DriftEndReason.ZoneEnd);
+            if (comboTimer <= 0f)
+            {
+                combo = 0;
+            }
         }
+
+        wasDrifting = car.IsDrifting;
     }
 
-    void StartDrift()
+    void UpdateUI()
     {
-        drifting = true;
-        multiplier = 0;
+        if (!driftText) return;
 
-        Debug.Log("DRIFT START");
-
-        car.BeginDrift();
-
-        ui.Show();
-        ui.SetMultiplier(multiplier);
-
-        Time.timeScale = slowMo;
-        Time.fixedDeltaTime = 0.02f * slowMo;
-    }
-
-    void TickDrift()
-    {
-        ui.RotateNeedle();
-
-        if (ui.DidFullRotation)
+        if (!car.IsDrifting && combo <= 0)
         {
-            Debug.Log("DRIFT FAIL (full rotation)");
-            EndDrift(DriftEndReason.FullRotation);
+            driftText.gameObject.SetActive(false);
             return;
         }
 
-        if (WasTapped())
-        {
-            if (ui.IsInSuccessZone())
-            {
-                multiplier++;
+        driftText.gameObject.SetActive(true);
 
-                int reward = baseReward * multiplier;
-
-                reward = Mathf.RoundToInt(
-                    reward * upgradeManager.driftMoneyMultiplier
-                ); 
-                
-                economy.AddCoins(reward);
-
-                Debug.Log("DRIFT + " + reward);
-
-                ui.SetMultiplier(multiplier);
-
-                car.SetDriftPower(multiplier);
-
-                ui.ResetRotation();
-            }
-            else
-            {
-                Debug.Log("DRIFT FAIL (bad tap)");
-                EndDrift(DriftEndReason.BadTap);
-            }
-        }
-    }
-
-    void EndDrift(DriftEndReason reason)
-    {
-        drifting = false;
-
-        driftLocked = true;
-        endReason = reason;
-
-        Debug.Log("DRIFT END: " + reason);
-
-        string failMessage = ""; 
-
-        switch (reason) 
-        { 
-            case DriftEndReason.BadTap: 
-                failMessage = "WRONG PLACE TAP"; 
-                break; 
-
-            case DriftEndReason.FullRotation: 
-                failMessage = "MISSED SUCCESS ZONE"; 
-                break;
-        }
-
-        if (reason != DriftEndReason.ZoneEnd)
-        {
-            ui.ShowFailOnly(failMessage);
-
-            Invoke(nameof(HideDriftUI), 0.5f);
-        }
-        else
-        {
-            ui.Hide();
-        }
-
-        car.EndDrift();
-
-        Time.timeScale = 1f;
-        Time.fixedDeltaTime = 0.02f;
-    }
-
-    void HideDriftUI()
-    {
-        ui.Hide();
-    }
-
-    static bool WasTapped()
-    {
-        return Keyboard.current?.spaceKey.wasPressedThisFrame == true ||
-               Mouse.current?.leftButton.wasPressedThisFrame == true ||
-               Touchscreen.current?.primaryTouch.press.wasPressedThisFrame == true;
+        driftText.text =
+            $"DRIFT x{combo}\n" +
+            $"{Mathf.Abs(car.DriftAngle):0}°";
     }
 }
