@@ -18,25 +18,23 @@ public class CarController : MonoBehaviour
     [SerializeField] private TrailRenderer leftTrail;
     [SerializeField] private TrailRenderer rightTrail;
 
-    [SerializeField] private float wallBounce = 0.5f;
+    //[SerializeField] private float wallBounce = 0.5f;
 
     private Vector2 moveForce;
-
     float Accel => acceleration * upgradeManager.speedMultiplier;
-
     public float CurrentSpeed => moveForce.magnitude;
-
     public float MaxSpeed => maxSpeed * upgradeManager.speedMultiplier;
 
     public bool IsDrifting { get; private set; }
-
     public float DriftAngle { get; private set; }
-
     private float driftGraceTimer;
 
     public int LapCount { get; private set; }
-
     public System.Action OnLapCompleted;
+
+    private int roadContacts = 0;
+    private bool isOnRoad;
+    float offRoadSpeedLimit = 3f;
 
     void Update()
     {
@@ -49,7 +47,7 @@ public class CarController : MonoBehaviour
         void UpdateSkidMarks()
         {
             bool showSkid =
-                IsDrifting && moveForce.magnitude > 2f;
+                IsDrifting && moveForce.magnitude > 3f;
 
             if (leftTrail != null)
                 leftTrail.emitting = showSkid;
@@ -65,16 +63,25 @@ public class CarController : MonoBehaviour
 
     void HandleAcceleration()
     {
+        float accel = Accel;
+
+        if (!IsOnRoad())
+            accel *= 0.9f;
+
         if (Keyboard.current.spaceKey.isPressed)
         {
-            moveForce +=
-                (Vector2)transform.up *
-                Accel *
-                Time.deltaTime;
+            moveForce += (Vector2)transform.up * accel * Time.deltaTime;
         }
 
-        moveForce =
-            Vector2.ClampMagnitude(moveForce, MaxSpeed);
+        float currentLimit = IsOnRoad() ? MaxSpeed : offRoadSpeedLimit;
+
+        float speed = moveForce.magnitude; 
+
+        if (speed > currentLimit) 
+        { 
+            moveForce = moveForce.normalized * 
+                Mathf.MoveTowards(speed, currentLimit, 6f * Time.deltaTime); 
+        }
     }
 
     // ─────────────────────────────
@@ -127,7 +134,8 @@ public class CarController : MonoBehaviour
             Vector2.SignedAngle(forward, moveForce.normalized);
 
         bool driftingNow =
-            moveForce.magnitude > 2f &&
+            IsOnRoad() &&
+            moveForce.magnitude > 3f &&
             Mathf.Abs(DriftAngle) > 15f;
 
         if (driftingNow)
@@ -143,6 +151,12 @@ public class CarController : MonoBehaviour
                 forward * moveForce.magnitude,
                 traction * Time.deltaTime
             );
+
+        if (leftTrail)
+            leftTrail.emitting = IsDrifting;
+
+        if (rightTrail)
+            rightTrail.emitting = IsDrifting;
     }
 
     // ─────────────────────────────
@@ -154,10 +168,27 @@ public class CarController : MonoBehaviour
 
     // ─────────────────────────────
 
-    private void OnCollisionEnter2D(Collision2D col)
+    //private void OnCollisionEnter2D(Collision2D col)
+    //{
+    //    Vector2 normal = col.contacts[0].normal;
+    //    moveForce = Vector2.Reflect(moveForce, normal) * wallBounce;
+    //}
+
+    private void OnTriggerEnter2D(Collider2D col)
     {
-        Vector2 normal = col.contacts[0].normal;
-        moveForce = Vector2.Reflect(moveForce, normal) * wallBounce;
+        if (col.CompareTag("Road"))
+            roadContacts++;
+    }
+
+    private void OnTriggerExit2D(Collider2D col)
+    {
+        if (col.CompareTag("Road"))
+            roadContacts--;
+    }
+
+    private bool IsOnRoad()
+    {
+        return roadContacts > 0;
     }
 
     // ─────────────────────────────

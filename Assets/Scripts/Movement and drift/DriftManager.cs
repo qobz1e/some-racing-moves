@@ -83,7 +83,7 @@ public class DriftManager : MonoBehaviour
     {
         if (!driftText) return;
 
-        if (!car.IsDrifting && combo <= 0)
+        if (!car.IsDrifting)
         {
             driftText.gameObject.SetActive(false);
             return;
