@@ -11,12 +11,14 @@ public class UpgradeManager : MonoBehaviour
     public int driftMoneyLevel;
 
     [Header("Max Levels")]
-    public int maxLevel = 3;
+    public int speedMaxLevel = 5;
+    public int lapRewardMaxLevel = 3;
+    public int driftRewardMaxLevel = 5;
 
     [Header("Base Costs")]
     public int speedBaseCost = 300;
-    public int lapMoneyBaseCost = 500;
-    public int driftMoneyBaseCost = 300;
+    public int lapMoneyBaseCost = 300;
+    public int driftMoneyBaseCost = 500;
 
     [Header("Cost Scaling")]
     public float costMultiplier = 1.8f;
@@ -28,6 +30,10 @@ public class UpgradeManager : MonoBehaviour
 
     private void Awake()
     {
+        speedLevel = 1;
+        lapMoneyLevel = 1;
+        driftMoneyLevel = 1;
+
         if (economy == null)
             economy = FindAnyObjectByType<EconomyManager>();
 
@@ -40,44 +46,24 @@ public class UpgradeManager : MonoBehaviour
 
     public int GetSpeedCost()
     {
-        if (speedLevel == 0)
-        {
-            return speedBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                speedBaseCost * Mathf.Pow(costMultiplier, speedLevel)
-            );
-        }
+        return Mathf.RoundToInt(
+            speedBaseCost * Mathf.Pow(costMultiplier, speedLevel - 1)
+        );
     }
 
     public int GetLapMoneyCost()
     {
-        if (lapMoneyLevel == 0)
-        {
-            return lapMoneyBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                lapMoneyBaseCost * Mathf.Pow(costMultiplier, lapMoneyLevel)
-            );
-        }
+        return Mathf.RoundToInt(
+            lapMoneyBaseCost * Mathf.Pow(costMultiplier, lapMoneyLevel - 1)
+        );
     }
 
     public int GetDriftMoneyCost()
     {
-        if (driftMoneyLevel == 0)
-        {
-            return driftMoneyBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                driftMoneyBaseCost * Mathf.Pow(costMultiplier, driftMoneyLevel)
-            );
-        }
+        return Mathf.RoundToInt(
+            driftMoneyBaseCost * Mathf.Pow(costMultiplier, driftMoneyLevel - 1)
+        );
+
     }
 
     // =========================
@@ -86,7 +72,7 @@ public class UpgradeManager : MonoBehaviour
 
     public void BuySpeedUpgrade()
     {
-        if (speedLevel >= maxLevel)
+        if (speedLevel >= speedMaxLevel)
             return;
 
         int cost = GetSpeedCost();
@@ -103,7 +89,7 @@ public class UpgradeManager : MonoBehaviour
 
     public void BuyLapMoneyUpgrade()
     {
-        if (lapMoneyLevel >= maxLevel)
+        if (lapMoneyLevel >= lapRewardMaxLevel)
             return;
 
         int cost = GetLapMoneyCost();
@@ -120,7 +106,7 @@ public class UpgradeManager : MonoBehaviour
 
     public void BuyDriftMoneyUpgrade()
     {
-        if (driftMoneyLevel >= maxLevel)
+        if (driftMoneyLevel >= driftRewardMaxLevel)
             return;
 
         int cost = GetDriftMoneyCost();
@@ -141,16 +127,17 @@ public class UpgradeManager : MonoBehaviour
 
     private void ApplyUpgrades()
     {
-        // +10% speed per level
+        // +5% speed per level
         speedMultiplier =
-            1f + speedLevel * 0.1f;
+            1f + (speedLevel - 1) * 0.05f;
 
-        // x1.5 / x2 / x2.5
+        // +50 coins per lap
         lapMoneyMultiplier =
-            1f + lapMoneyLevel * 0.5f;
+            1f + (lapMoneyLevel - 1) * 0.5f;
 
+        // +3 coins to base drift reward
         driftMoneyMultiplier =
-            1f + driftMoneyLevel * 0.5f;
+            1f + (driftMoneyLevel - 1) * 0.3f;
 
         Debug.Log(
             $"Speed x{speedMultiplier} | " +

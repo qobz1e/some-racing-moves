@@ -7,6 +7,9 @@ public class EconomyManager : MonoBehaviour
     [Header("Rewards")]
     public int coinsPerLap = 100;
 
+    [SerializeField] private CoinPopup coinPopupPrefab;
+    [SerializeField] private RectTransform popupParent;
+
     public int  Coins { get; private set; }
     public System.Action<int, int> OnCoinsChanged;
 
@@ -33,9 +36,7 @@ public class EconomyManager : MonoBehaviour
             coinsPerLap * upgradeManager.lapMoneyMultiplier
         ); 
 
-        Coins += reward;
-
-        OnCoinsChanged?.Invoke(Coins, reward);
+        AddCoins(reward);
         Debug.Log($"[Economy] Lap! +{reward} → total {Coins}");
     }
 
@@ -43,6 +44,23 @@ public class EconomyManager : MonoBehaviour
     {
         Coins += amount;
         OnCoinsChanged?.Invoke(Coins, amount);
+
+        if (coinPopupPrefab != null)
+        {
+            CoinPopup popup =
+                Instantiate(
+                    coinPopupPrefab,
+                    popupParent
+                );
+
+            popup.transform.localPosition += new Vector3(
+                Random.Range(-100f, 100f),
+                Random.Range(-100f, 100f),
+                0f
+            );
+
+            popup.Setup(amount);
+        }
     }
 }
 

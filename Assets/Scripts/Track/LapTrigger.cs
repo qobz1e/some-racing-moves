@@ -7,9 +7,13 @@ public class LapTrigger : MonoBehaviour
         CarController car =
             other.GetComponent<CarController>();
 
-        if (car != null)
-        {
-            car.CompleteLap();
-        }
+        if (car == null)
+            return;
+
+        if (!car.checkpointPassed)
+            return;
+
+        car.CompleteLap();
+        car.SetCheckpointPassed(false);
     }
 }

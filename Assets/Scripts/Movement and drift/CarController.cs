@@ -10,6 +10,13 @@ public class CarController : MonoBehaviour
     public float maxSpeed = 6f;
     public float drag = 2f;
 
+    [SerializeField] private float wallBounce = 1f;
+
+    private Vector2 moveForce;
+    float Accel => acceleration * upgradeManager.speedMultiplier;
+    public float CurrentSpeed => moveForce.magnitude;
+    public float MaxSpeed => maxSpeed * upgradeManager.speedMultiplier;
+
     [Header("Steering")]
     public float steerAngle = 30f;
 
@@ -18,18 +25,14 @@ public class CarController : MonoBehaviour
     [SerializeField] private TrailRenderer leftTrail;
     [SerializeField] private TrailRenderer rightTrail;
 
-    //[SerializeField] private float wallBounce = 0.5f;
-
-    private Vector2 moveForce;
-    float Accel => acceleration * upgradeManager.speedMultiplier;
-    public float CurrentSpeed => moveForce.magnitude;
-    public float MaxSpeed => maxSpeed * upgradeManager.speedMultiplier;
-
     public bool IsDrifting { get; private set; }
     public float DriftAngle { get; private set; }
     private float driftGraceTimer;
 
+    //private float brakeFactor;
+
     public int LapCount { get; private set; }
+    public bool checkpointPassed { get; private set; }
     public System.Action OnLapCompleted;
 
     private int roadContacts = 0;
@@ -38,6 +41,8 @@ public class CarController : MonoBehaviour
 
     void Update()
     {
+        //brakeFactor = Keyboard.current.spaceKey.isPressed ? 1f : 0f;
+
         HandleAcceleration();
         HandleSteering();
         HandleDrag(); 
@@ -68,19 +73,19 @@ public class CarController : MonoBehaviour
         if (!IsOnRoad())
             accel *= 0.9f;
 
-        if (Keyboard.current.spaceKey.isPressed)
+        if (Keyboard.current.wKey.isPressed)
         {
             moveForce += (Vector2)transform.up * accel * Time.deltaTime;
         }
 
         float currentLimit = IsOnRoad() ? MaxSpeed : offRoadSpeedLimit;
 
-        float speed = moveForce.magnitude; 
+        float speed = moveForce.magnitude;
 
-        if (speed > currentLimit) 
-        { 
-            moveForce = moveForce.normalized * 
-                Mathf.MoveTowards(speed, currentLimit, 6f * Time.deltaTime); 
+        if (speed > currentLimit)
+        {
+            moveForce = moveForce.normalized *
+                Mathf.MoveTowards(speed, currentLimit, 6f * Time.deltaTime);
         }
     }
 
@@ -168,11 +173,11 @@ public class CarController : MonoBehaviour
 
     // ─────────────────────────────
 
-    //private void OnCollisionEnter2D(Collision2D col)
-    //{
-    //    Vector2 normal = col.contacts[0].normal;
-    //    moveForce = Vector2.Reflect(moveForce, normal) * wallBounce;
-    //}
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        Vector2 normal = col.contacts[0].normal;
+        moveForce = Vector2.Reflect(moveForce, normal) * wallBounce;
+    }
 
     private void OnTriggerEnter2D(Collider2D col)
     {
@@ -197,5 +202,10 @@ public class CarController : MonoBehaviour
     {
         LapCount++;
         OnLapCompleted?.Invoke();
+    }
+
+    public void SetCheckpointPassed(bool value)
+    {
+        checkpointPassed = value;
     }
 }

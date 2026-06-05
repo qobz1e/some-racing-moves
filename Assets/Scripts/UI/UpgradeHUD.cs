@@ -19,6 +19,10 @@ public class UpgradeHUD : MonoBehaviour
     [SerializeField] private TMP_Text lapPrice;
     [SerializeField] private TMP_Text driftPrice;
 
+    [SerializeField] private TMP_Text speedLevel;
+    [SerializeField] private TMP_Text lapLevel;
+    [SerializeField] private TMP_Text driftLevel;
+
     [SerializeField] private Image speedImg;
     [SerializeField] private Image lapImg;
     [SerializeField] private Image driftImg;
@@ -55,8 +59,9 @@ public class UpgradeHUD : MonoBehaviour
             speedImg,
             speedText,
             speedPrice,
+            speedLevel,
             upgradeManager.speedLevel,
-            upgradeManager.maxLevel,
+            upgradeManager.speedMaxLevel,
             speedCost,
             economy.Coins >= speedCost
         );
@@ -66,8 +71,9 @@ public class UpgradeHUD : MonoBehaviour
             lapImg,
             lapText,
             lapPrice,
+            lapLevel,
             upgradeManager.lapMoneyLevel,
-            upgradeManager.maxLevel,
+            upgradeManager.lapRewardMaxLevel,
             lapCost,
             economy.Coins >= lapCost
         );
@@ -77,8 +83,9 @@ public class UpgradeHUD : MonoBehaviour
             driftImg,
             driftText,
             driftPrice,
+            driftLevel,
             upgradeManager.driftMoneyLevel,
-            upgradeManager.maxLevel,
+            upgradeManager.driftRewardMaxLevel,
             driftCost,
             economy.Coins >= driftCost
         );
@@ -89,14 +96,16 @@ public class UpgradeHUD : MonoBehaviour
         Image img,
         TMPro.TMP_Text txt,
         TMPro.TMP_Text priceText,
+        TMPro.TMP_Text levelText,
         int level,
         int maxLevel,
         int cost,
         bool canBuy)
     {
-        bool isMax = level >= maxLevel;
+        if (levelText)
+            levelText.text = $"level {level}/{maxLevel}";
 
-        if (isMax)
+        if (level >= maxLevel)
         {
             btn.interactable = false;
 

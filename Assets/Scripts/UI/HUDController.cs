@@ -48,7 +48,7 @@ public class HUDController : MonoBehaviour
         // Initial state
         SetCoins(0);
         SetLap(0);
-        if (txtHint)      txtHint.text = "SPACE TO ACCELERATE\nA/D TO STEER";
+        if (txtHint)      txtHint.text = "W TO ACCELERATE\nA/D TO STEER";
         if (txtCoinPopup) txtCoinPopup.gameObject.SetActive(false);
         if (speedBar)     speedBar.value = 0f;
     }

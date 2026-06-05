@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using System;
 
 public class DriftManager : MonoBehaviour
 {
@@ -53,11 +54,12 @@ public class DriftManager : MonoBehaviour
                 int reward =
                     Mathf.RoundToInt(
                         baseReward *
-                        combo *
+                        (1f + Mathf.Floor(combo/5f)) *
                         upgrades.driftMoneyMultiplier
                     );
 
                 economy.AddCoins(reward);
+                Debug.Log($"[Economy] Drift! +{reward} → total {economy.Coins}");
 
                 combo++;
                 comboTimer = comboDecayTime;
