@@ -49,6 +49,7 @@ public class TrackRenderer : MonoBehaviour
 
         Vector3[] verts = new Vector3[n * 2];
         int[] tris = new int[n * 6];
+        Vector2[] uv = new Vector2[n * 2];
 
         // vertices
         for (int i = 0; i < n; i++)
@@ -62,6 +63,11 @@ public class TrackRenderer : MonoBehaviour
 
             verts[i * 2] = curr + right * (trackWidth * 0.5f);
             verts[i * 2 + 1] = curr - right * (trackWidth * 0.5f);
+
+            float v = i * 0.5f;
+
+            uv[i * 2] = new Vector2(0, v);
+            uv[i * 2 + 1] = new Vector2(1, v);
         }
 
         // triangles (loop)
@@ -88,6 +94,8 @@ public class TrackRenderer : MonoBehaviour
         mesh.Clear();
         mesh.vertices = verts;
         mesh.triangles = tris;
+        mesh.uv = uv;
+
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
     }
