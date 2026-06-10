@@ -25,12 +25,18 @@ public class HUDController : MonoBehaviour
     [Header("Speed bar")]
     public Slider speedBar;
 
+    [Header("Pit Stop")]
+    public TMP_Text txtPitstop;
+    public Slider pitstopBar;
+
     [Header("Coin popup")]
     public float popupDuration = 1.2f;
 
     // ── Private refs ──────────────────────────────────────────────────────────
     private CarController _car;
     private EconomyManager _eco;
+    private PitstopManager _pitstop;
+    private float _displayedPitValue = 1f;
     private float          _popupTimer;
     private bool           _hintShown = true;
 
@@ -38,12 +44,16 @@ public class HUDController : MonoBehaviour
     {
         _car = FindAnyObjectByType<CarController>();
         _eco = FindAnyObjectByType<EconomyManager>();
+        _pitstop = FindAnyObjectByType<PitstopManager>();
 
-        if (_eco != null)
+        if (_eco)
             _eco.OnCoinsChanged += OnCoinsChanged;
 
-        if (_car != null)
+        if (_car)
             _car.OnLapCompleted += OnLapCompleted;
+
+        if (pitstopBar)
+            pitstopBar.value = 1f;
 
         // Initial state
         SetCoins(0);
@@ -67,6 +77,36 @@ public class HUDController : MonoBehaviour
         float ratio = _car.MaxSpeed > 0 ? _car.CurrentSpeed / _car.MaxSpeed : 0f;
         if (speedBar) speedBar.value = ratio;
         if (txtSpeed) txtSpeed.text  = $"{_car.CurrentSpeed * 10f:F0} km/h";
+
+        // Remaining distance before pitstop
+        if (_pitstop != null)
+        {
+            float targetValue =
+                Mathf.Clamp01(
+                    1f - _car.TotalDistance / _pitstop.serviceDistance
+                );
+
+            _displayedPitValue = Mathf.Lerp(
+                _displayedPitValue,
+                targetValue,
+                3f * Time.deltaTime
+            );
+
+            if (pitstopBar)
+                pitstopBar.value = _displayedPitValue;
+
+            if (txtPitstop)
+            {
+                float remaining =
+                    Mathf.Max(
+                        0f,
+                        _pitstop.serviceDistance - _car.TotalDistance
+                    );
+
+                txtPitstop.text =
+                    $"{remaining / 1000f:0.0} km";
+            }
+        }
 
         // Hide hint after first movement
         if (_hintShown && _car.CurrentSpeed > 0.1f)

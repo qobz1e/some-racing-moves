@@ -115,7 +115,7 @@ public class TrackRenderer : MonoBehaviour
 
         mr.sortingLayerName = "Track";
         mr.tag = "Road";
-        mr.sortingOrder = -2;
+        mr.sortingOrder = -3;
 
         mr.material = borderMaterial;
 

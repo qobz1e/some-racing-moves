@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class CarController : MonoBehaviour
 {
     [SerializeField] private UpgradeManager upgradeManager;
+    [SerializeField] private PitstopManager pitstopManager;
 
     [Header("Movement")]
     public float acceleration = 15f;
@@ -29,19 +30,41 @@ public class CarController : MonoBehaviour
     public float DriftAngle { get; private set; }
     private float driftGraceTimer;
 
-    //private float brakeFactor;
+    // pitstops
+    public float TotalDistance { get; private set; }
+    public bool IsInPitstop { get; private set; }
+    public bool NeedsPitstop => pitstopManager.NeedsPitstop;
+    private float pitstopTimer;
 
+    // lap completing
     public int LapCount { get; private set; }
     public bool checkpointPassed { get; private set; }
     public System.Action OnLapCompleted;
 
+    // slowing down off the road
     private int roadContacts = 0;
     private bool isOnRoad;
     float offRoadSpeedLimit = 3f;
 
+    //private float brakeFactor;
+
     void Update()
     {
         //brakeFactor = Keyboard.current.spaceKey.isPressed ? 1f : 0f;
+
+        if (IsInPitstop)
+        {
+            pitstopTimer -= Time.deltaTime;
+
+            if (pitstopTimer <= 0f)
+            {
+                IsInPitstop = false;
+
+                pitstopManager.PerformPitstop();
+            }
+
+            return;
+        }
 
         HandleAcceleration();
         HandleSteering();
@@ -73,12 +96,17 @@ public class CarController : MonoBehaviour
         if (!IsOnRoad())
             accel *= 0.9f;
 
+        if (pitstopManager.NeedsPitstop)
+            accel *= 0.8f;
+
         if (Keyboard.current.wKey.isPressed)
         {
             moveForce += (Vector2)transform.up * accel * Time.deltaTime;
         }
 
-        float currentLimit = IsOnRoad() ? MaxSpeed : offRoadSpeedLimit;
+        float currentLimit =
+            (IsOnRoad() ? MaxSpeed : offRoadSpeedLimit)
+            * pitstopManager.SpeedMultiplier;
 
         float speed = moveForce.magnitude;
 
@@ -140,6 +168,8 @@ public class CarController : MonoBehaviour
 
         bool driftingNow =
             IsOnRoad() &&
+            !IsInPitstop &&
+            !pitstopManager.NeedsPitstop &&
             moveForce.magnitude > 3f &&
             Mathf.Abs(DriftAngle) > 15f;
 
@@ -156,19 +186,36 @@ public class CarController : MonoBehaviour
                 forward * moveForce.magnitude,
                 traction * Time.deltaTime
             );
-
-        if (leftTrail)
-            leftTrail.emitting = IsDrifting;
-
-        if (rightTrail)
-            rightTrail.emitting = IsDrifting;
     }
 
     // ─────────────────────────────
 
     void Move()
     {
-        transform.position += (Vector3)moveForce * Time.deltaTime;
+        Vector3 delta = (Vector3)moveForce * Time.deltaTime;
+
+        transform.position += delta;
+
+        TotalDistance += delta.magnitude * 3;
+    }
+
+    // ─────────────────────────────
+
+    public void ResetDistance()
+    {
+        TotalDistance = 0f;
+    }
+
+    public void StartPitstop()
+    {
+        if (IsInPitstop)
+            return;
+
+        IsInPitstop = true;
+        pitstopManager.StartService(upgradeManager.pitstopDuration);
+        pitstopTimer = upgradeManager.pitstopDuration;
+
+        moveForce = Vector2.zero;
     }
 
     // ─────────────────────────────

@@ -32,7 +32,7 @@ public class PauseManager : MonoBehaviour
             pauseUI.SetActive(true);
     }
 
-    void Resume()
+    public void Resume()
     {
         isPaused = false;
         Time.timeScale = 1f;
