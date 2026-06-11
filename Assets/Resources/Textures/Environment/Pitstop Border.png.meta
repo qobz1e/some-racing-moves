@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 98fcacd2fb7a97448b48de7b74d4cac8
+guid: 1262111d97fb9bf40925667ef09f040d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4226728495964450170
-    second: Asphalt_0
+      213: -1605378070387111718
+    second: Pitstop Border_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -40,9 +40,9 @@ TextureImporter:
     filterMode: 1
     aniso: 1
     mipBias: 0
-    wrapU: 0
-    wrapV: 0
-    wrapW: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Asphalt_0
+      name: Pitstop Border_0
       rect:
         serializedVersion: 2
         x: 0
@@ -108,15 +108,15 @@ TextureImporter:
         width: 1254
         height: 1254
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 682940cb3d4a755c0800000000000000
-      internalID: -4226728495964450170
+      spriteID: ad8cf50962d88b9e0800000000000000
+      internalID: -1605378070387111718
       vertices: []
       indices: 
       edges: []
@@ -125,19 +125,17 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 24c7757fe7b95b4418a607db3ae8b1fc
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 1097aa160be2a1146a44ad11b453fa62, type: 3}
-      name: "\u044B"
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Asphalt_0: -4226728495964450170
+      Pitstop Border_0: -1605378070387111718
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

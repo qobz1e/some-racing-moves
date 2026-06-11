@@ -15,6 +15,8 @@ public class EconomyManager : MonoBehaviour
 
     private CarController _car;
 
+    private float passiveIncomeTimer;
+
     private void Awake()
     {
         _car = FindAnyObjectByType<CarController>();
@@ -22,6 +24,21 @@ public class EconomyManager : MonoBehaviour
             _car.OnLapCompleted += AwardLap;
         else
             Debug.LogWarning("[EconomyManager] CarController not found.");
+    }
+
+    void Update()
+    {
+        passiveIncomeTimer += Time.deltaTime;
+
+        if (passiveIncomeTimer >= 3f)
+        {
+            passiveIncomeTimer = 0f;
+
+            if (upgradeManager.passiveIncomeAmount > 0)
+            {
+                AddCoins(upgradeManager.passiveIncomeAmount);
+            }
+        }
     }
 
     private void OnDestroy()

@@ -7,7 +7,7 @@ public class TrackRenderer : MonoBehaviour
 {
     [Header("Track Width")]
     public float trackWidth = 2.5f;
-    public float borderWidth = 0.2f;
+    public float borderWidth = 0.5f;
 
     [Header("Materials")]
     public Material roadMaterial;
@@ -129,7 +129,7 @@ public class TrackRenderer : MonoBehaviour
 
         float width = trackWidth + borderWidth;
 
-        float uvScale = 0.5f;
+        float uvScale = 0.05f;
 
         for (int i = 0; i < n; i++)
         {

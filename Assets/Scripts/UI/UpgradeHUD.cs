@@ -7,45 +7,34 @@ public class UpgradeHUD : MonoBehaviour
     [SerializeField] private EconomyManager economy;
     [SerializeField] private UpgradeManager upgradeManager;
 
-    [SerializeField] private Button speedBtn;
-    [SerializeField] private Button lapBtn;
-    [SerializeField] private Button driftBtn;
-    [SerializeField] private Button durabilityBtn;
-    [SerializeField] private Button pitstopTimeBtn;
+    [System.Serializable]
+    public class UpgradeUI
+    {
+        public Button button;
+        public TMP_Text nameText;
+        public TMP_Text priceText;
+        public TMP_Text levelText;
+        public Image icon;
+    }
 
-    [SerializeField] private TMP_Text speedText;
-    [SerializeField] private TMP_Text lapText;
-    [SerializeField] private TMP_Text driftText;
-    [SerializeField] private TMP_Text durabilityText;
-    [SerializeField] private TMP_Text pitstopTimeText;
-
-    [SerializeField] private TMP_Text speedPrice;
-    [SerializeField] private TMP_Text lapPrice;
-    [SerializeField] private TMP_Text driftPrice;
-    [SerializeField] private TMP_Text durabilityPrice;
-    [SerializeField] private TMP_Text pitstopTimePrice;
-
-    [SerializeField] private TMP_Text speedLevel;
-    [SerializeField] private TMP_Text lapLevel;
-    [SerializeField] private TMP_Text driftLevel;
-    [SerializeField] private TMP_Text durabilityLevel;
-    [SerializeField] private TMP_Text pitstopTimeLevel;
-
-    [SerializeField] private Image speedImg;
-    [SerializeField] private Image lapImg;
-    [SerializeField] private Image driftImg;
-    [SerializeField] private Image durabilityImg;
-    [SerializeField] private Image pitstopTimeImg;
+    [SerializeField] private UpgradeUI speedUI;
+    [SerializeField] private UpgradeUI lapMoneyUI;
+    [SerializeField] private UpgradeUI driftMoneyUI;
+    [SerializeField] private UpgradeUI durabilityUI;
+    [SerializeField] private UpgradeUI pitstopTimeUI;
+    [SerializeField] private UpgradeUI passiveIncomeUI;
 
     private void Start()
     {
-        speedBtn.onClick.AddListener(BuySpeed);
-        lapBtn.onClick.AddListener(BuyLap);
-        driftBtn.onClick.AddListener(BuyDrift);
-        durabilityBtn.onClick.AddListener(BuyDurability);
-        pitstopTimeBtn.onClick.AddListener(BuyPitstopTime);
+        speedUI.button.onClick.AddListener(BuySpeed);
+        lapMoneyUI.button.onClick.AddListener(BuyLap);
+        driftMoneyUI.button.onClick.AddListener(BuyDrift);
+        durabilityUI.button.onClick.AddListener(BuyDurability);
+        pitstopTimeUI.button.onClick.AddListener(BuyPitstopTime);
+        passiveIncomeUI.button.onClick.AddListener(BuyPassiveIncome);
 
         economy.OnCoinsChanged += OnCoinsChanged;
+
         Refresh();
     }
 
@@ -67,108 +56,93 @@ public class UpgradeHUD : MonoBehaviour
         int driftCost = upgradeManager.GetDriftMoneyCost();
         int durabilityCost = upgradeManager.GetDurabilityCost();
         int pitstopTimeCost = upgradeManager.GetPitstopTimeCost();
+        int passiveIncomeCost = upgradeManager.GetPassiveIncomeCost();
 
         UpdateButton(
-            speedBtn,
-            speedImg,
-            speedText,
-            speedPrice,
-            speedLevel,
-            upgradeManager.speedLevel,
-            upgradeManager.speedMaxLevel,
+            speedUI,
+            upgradeManager.speed.level,
+            upgradeManager.speed.maxLevel,
             speedCost,
             economy.Coins >= speedCost
         );
 
         UpdateButton(
-            lapBtn,
-            lapImg,
-            lapText,
-            lapPrice,
-            lapLevel,
-            upgradeManager.lapMoneyLevel,
-            upgradeManager.lapRewardMaxLevel,
+            lapMoneyUI,
+            upgradeManager.lapMoney.level,
+            upgradeManager.lapMoney.maxLevel,
             lapCost,
             economy.Coins >= lapCost
         );
 
         UpdateButton(
-            driftBtn,
-            driftImg,
-            driftText,
-            driftPrice,
-            driftLevel,
-            upgradeManager.driftMoneyLevel,
-            upgradeManager.driftRewardMaxLevel,
+            driftMoneyUI,
+            upgradeManager.driftMoney.level,
+            upgradeManager.driftMoney.maxLevel,
             driftCost,
             economy.Coins >= driftCost
         );
 
         UpdateButton(
-            durabilityBtn,
-            durabilityImg,
-            durabilityText,
-            durabilityPrice,
-            durabilityLevel,
-            upgradeManager.durabilityLevel,
-            upgradeManager.durabilityMaxLevel,
+            durabilityUI,
+            upgradeManager.durabilityX.level,
+            upgradeManager.durabilityX.maxLevel,
             durabilityCost,
             economy.Coins >= durabilityCost
         );
 
         UpdateButton(
-            pitstopTimeBtn,
-            pitstopTimeImg,
-            pitstopTimeText,
-            pitstopTimePrice,
-            pitstopTimeLevel,
-            upgradeManager.pitstopTimeLevel,
-            upgradeManager.pitstopTimeMaxLevel,
+            pitstopTimeUI,
+            upgradeManager.pitstopTime.level,
+            upgradeManager.pitstopTime.maxLevel,
             pitstopTimeCost,
             economy.Coins >= pitstopTimeCost
+        );
+
+        UpdateButton(
+            passiveIncomeUI,
+            upgradeManager.passiveIncome.level,
+            upgradeManager.passiveIncome.maxLevel,
+            passiveIncomeCost,
+            economy.Coins >= passiveIncomeCost
         );
     }
 
     private void UpdateButton(
-        Button btn,
-        Image img,
-        TMPro.TMP_Text txt,
-        TMPro.TMP_Text priceText,
-        TMPro.TMP_Text levelText,
+        UpgradeUI ui,
         int level,
         int maxLevel,
         int cost,
         bool canBuy)
     {
-        if (levelText)
-            levelText.text = $"level {level}/{maxLevel}";
+        if (ui.levelText)
+            ui.levelText.text = $"level {level}/{maxLevel}";
 
         if (level >= maxLevel)
         {
-            btn.interactable = false;
+            ui.button.interactable = false;
 
-            SetAlpha(img, 0.3f);
-            SetAlpha(txt, 0.3f);
-            SetAlpha(priceText, 0.3f);
-            SetAlpha(levelText, 0.3f);
+            SetAlpha(ui.icon, 0.3f);
+            SetAlpha(ui.nameText, 0.3f);
+            SetAlpha(ui.priceText, 0.3f);
+            SetAlpha(ui.levelText, 0.3f);
 
-            if (priceText)
-                priceText.text = "MAX";
+            if (ui.priceText)
+                ui.priceText.text = "MAX";
 
             return;
         }
 
-        btn.interactable = canBuy;
+        ui.button.interactable = canBuy;
 
         float a = canBuy ? 1f : 0.5f;
 
-        SetAlpha(img, a);
-        SetAlpha(txt, a);
-        SetAlpha(priceText, a);
-        SetAlpha(levelText, a);
+        SetAlpha(ui.icon, a);
+        SetAlpha(ui.nameText, a);
+        SetAlpha(ui.priceText, a);
+        SetAlpha(ui.levelText, a);
 
-        if (priceText)
-            priceText.text = cost.ToString();
+        if (ui.priceText)
+            ui.priceText.text = cost.ToString();
     }
 
     private void BuySpeed()
@@ -198,6 +172,12 @@ public class UpgradeHUD : MonoBehaviour
     private void BuyPitstopTime()
     {
         upgradeManager.BuyPitstopTimeUpgrade();
+        Refresh();
+    }
+
+    private void BuyPassiveIncome()
+    {
+        upgradeManager.BuyPassiveIncomeUpgrade();
         Refresh();
     }
 

@@ -5,29 +5,25 @@ public class UpgradeManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private EconomyManager economy;
 
-    [Header("Upgrade Levels")]
-    public int speedLevel;
-    public int lapMoneyLevel;
-    public int driftMoneyLevel;
-    public int durabilityLevel;
-    public int pitstopTimeLevel;
+    [System.Serializable]
+    public class UpgradeData
+    {
+        public int level;
+        public int maxLevel;
 
-    [Header("Max Levels")]
-    public int speedMaxLevel = 10;
-    public int lapRewardMaxLevel = 3;
-    public int driftRewardMaxLevel = 5;
-    public int durabilityMaxLevel = 10;
-    public int pitstopTimeMaxLevel = 10;
+        public int baseCost;
+    }
 
-    [Header("Base Costs")]
-    public int speedBaseCost = 300;
-    public int lapMoneyBaseCost = 300;
-    public int driftMoneyBaseCost = 500;
-    public int durabilityBaseCost = 300;
-    public int pitstopTimeBaseCost = 300;
+    [Header("Upgrades")]
+    public UpgradeData speed;
+    public UpgradeData lapMoney;
+    public UpgradeData driftMoney;
+    public UpgradeData durabilityX;
+    public UpgradeData pitstopTime;
+    public UpgradeData passiveIncome;
 
     [Header("Cost Scaling")]
-    public float costMultiplier = 1.8f;
+    public float costMultiplier = 1.6f;
 
     [Header("Current Upgrades")]
     public float speedMultiplier = 1f;
@@ -35,14 +31,16 @@ public class UpgradeManager : MonoBehaviour
     public float driftMoneyMultiplier = 1f;
     public float durability = 1000f;
     public float pitstopDuration = 10f;
+    public int passiveIncomeAmount;
 
     private void Awake()
     {
-        speedLevel = 0;
-        lapMoneyLevel = 0;
-        driftMoneyLevel = 0;
-        durabilityLevel = 0;
-        pitstopTimeLevel = 0;
+        speed.level = 0;
+        lapMoney.level = 0;
+        driftMoney.level = 0;
+        durabilityX.level = 0;
+        pitstopTime.level = 0;
+        passiveIncome.level = 0;
 
         if (economy == null)
             economy = FindAnyObjectByType<EconomyManager>();
@@ -54,161 +52,98 @@ public class UpgradeManager : MonoBehaviour
     // COSTS
     // =========================
 
-    public int GetSpeedCost()
+    private int GetCost(int baseCost, int level)
     {
-        if (speedLevel == 0) {
-            return speedBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                speedBaseCost * Mathf.Pow(costMultiplier, speedLevel)
-            );
-        }
+        return Mathf.RoundToInt(
+            baseCost * Mathf.Pow(costMultiplier, level)
+        );
     }
 
-    public int GetLapMoneyCost()
-    {
-        if (lapMoneyLevel == 0) {
-            return lapMoneyBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                lapMoneyBaseCost * Mathf.Pow(costMultiplier, lapMoneyLevel)
-            );
-        }
-    }
+    public int GetSpeedCost() => GetCost(speed.baseCost, speed.level);
 
-    public int GetDriftMoneyCost()
-    {
-        if (driftMoneyLevel == 0) {
-            return driftMoneyBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                driftMoneyBaseCost * Mathf.Pow(costMultiplier, driftMoneyLevel)
-            );
-        }
+    public int GetLapMoneyCost() => GetCost(lapMoney.baseCost, lapMoney.level);
 
-    }
+    public int GetDriftMoneyCost() => GetCost(driftMoney.baseCost, driftMoney.level);
 
-    public int GetDurabilityCost()
-    {
-        if (durabilityLevel == 0) {
-            return durabilityBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                durabilityBaseCost * Mathf.Pow(costMultiplier, durabilityLevel)
-            );
-        }
+    public int GetDurabilityCost() => GetCost(durabilityX.baseCost, durabilityX.level);
 
-    }
+    public int GetPitstopTimeCost() => GetCost(pitstopTime.baseCost, pitstopTime.level);
 
-    public int GetPitstopTimeCost()
-    {
-        if (pitstopTimeLevel == 0)
-        {
-            return pitstopTimeBaseCost;
-        }
-        else
-        {
-            return Mathf.RoundToInt(
-                pitstopTimeBaseCost * Mathf.Pow(costMultiplier, pitstopTimeLevel)
-            );
-        }
-    }
+    public int GetPassiveIncomeCost() => GetCost(passiveIncome.baseCost, passiveIncome.level);
 
     // =========================
     // BUY METHODS
     // =========================
 
-    public void BuySpeedUpgrade()
+    private bool TryBuy(ref int level, int maxLevel, int cost)
     {
-        if (speedLevel >= speedMaxLevel)
-            return;
-
-        int cost = GetSpeedCost();
+        if (level >= maxLevel)
+            return false;
 
         if (economy.Coins < cost)
-            return;
+            return false;
 
         economy.AddCoins(-cost);
 
-        speedLevel++;
+        level++;
 
         ApplyUpgrades();
+
+        return true;
+    }
+
+    public void BuySpeedUpgrade()
+    {
+        TryBuy(
+            ref speed.level,
+            speed.maxLevel,
+            GetSpeedCost()
+        );
     }
 
     public void BuyLapMoneyUpgrade()
     {
-        if (lapMoneyLevel >= lapRewardMaxLevel)
-            return;
-
-        int cost = GetLapMoneyCost();
-
-        if (economy.Coins < cost)
-            return;
-
-        economy.AddCoins(-cost);
-
-        lapMoneyLevel++;
-
-        ApplyUpgrades();
+        TryBuy(
+            ref lapMoney.level,
+            lapMoney.maxLevel,
+            GetLapMoneyCost()
+        );
     }
 
     public void BuyDriftMoneyUpgrade()
     {
-        if (driftMoneyLevel >= driftRewardMaxLevel)
-            return;
-
-        int cost = GetDriftMoneyCost();
-
-        if (economy.Coins < cost)
-            return;
-
-        economy.AddCoins(-cost);
-
-        driftMoneyLevel++;
-
-        ApplyUpgrades();
+        TryBuy(
+            ref driftMoney.level,
+            driftMoney.maxLevel,
+            GetDriftMoneyCost()
+        );
     }
 
     public void BuyDurabilityUpgrade()
     {
-        if (durabilityLevel >= durabilityMaxLevel)
-            return;
-
-        int cost = GetDurabilityCost();
-
-        if (economy.Coins < cost)
-            return;
-
-        economy.AddCoins(-cost);
-
-        durabilityLevel++;
-
-        ApplyUpgrades();
+        TryBuy(
+            ref durabilityX.level,
+            durabilityX.maxLevel,
+            GetDurabilityCost()
+        );
     }
 
     public void BuyPitstopTimeUpgrade()
     {
-        if (pitstopTimeLevel >= pitstopTimeMaxLevel)
-            return;
+        TryBuy(
+            ref pitstopTime.level,
+            pitstopTime.maxLevel,
+            GetPitstopTimeCost()
+        );
+    }
 
-        int cost = GetPitstopTimeCost();
-
-        if (economy.Coins < cost)
-            return;
-
-        economy.AddCoins(-cost);
-
-        pitstopTimeLevel++;
-
-        ApplyUpgrades();
+    public void BuyPassiveIncomeUpgrade()
+    {
+        TryBuy(
+            ref passiveIncome.level,
+            passiveIncome.maxLevel,
+            GetPassiveIncomeCost()
+        );
     }
 
     // =========================
@@ -219,29 +154,36 @@ public class UpgradeManager : MonoBehaviour
     {
         // +5% speed per level
         speedMultiplier =
-            1f + speedLevel * 0.05f;
+            1f + speed.level * 0.05f;
 
         // +50 coins per lap
         lapMoneyMultiplier =
-            1f + lapMoneyLevel * 0.5f;
+            1f + lapMoney.level * 0.5f;
 
         // +3 coins to base drift reward
         driftMoneyMultiplier =
-            1f + driftMoneyLevel * 0.3f;
+            1f + driftMoney.level * 0.3f;
 
-        // +1 km to base durability
+        // +1km to base durability
         durability = 
-            1000f + durabilityLevel * 500f;
+            1000f + durabilityX.level * 500f;
 
-        // -1 s from base duration
-        pitstopDuration = 10f - pitstopTimeLevel;
+        // -1s from base duration
+        pitstopDuration = 10f - pitstopTime.level;
+
+        // +5 coins per 3s
+        passiveIncomeAmount =
+            passiveIncome.level <= 0
+                ? 0
+                : 10 + (passiveIncome.level - 1) * 5;
 
         Debug.Log(
             $"Speed x{speedMultiplier} | " +
             $"Lap x{lapMoneyMultiplier} | " +
             $"Drift x{driftMoneyMultiplier} | " +
             $"Durability {durability} m | " +
-            $"Pitstop {pitstopDuration}s"
+            $"Pitstop {pitstopDuration}s | " +
+            $"Passive {passiveIncomeAmount} coins"
         );
     }
 }
