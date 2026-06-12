@@ -21,6 +21,7 @@ public class UpgradeManager : MonoBehaviour
     public UpgradeData durabilityX;
     public UpgradeData pitstopTime;
     public UpgradeData passiveIncome;
+    public UpgradeData nitro;
 
     [Header("Cost Scaling")]
     public float costMultiplier = 1.6f;
@@ -29,9 +30,14 @@ public class UpgradeManager : MonoBehaviour
     public float speedMultiplier = 1f;
     public float lapMoneyMultiplier = 1f;
     public float driftMoneyMultiplier = 1f;
+
     public float durability = 1000f;
     public float pitstopDuration = 10f;
+
     public int passiveIncomeAmount;
+
+    public float nitroCapacity;
+    public float nitroMultiplier;
 
     private void Awake()
     {
@@ -41,6 +47,7 @@ public class UpgradeManager : MonoBehaviour
         durabilityX.level = 0;
         pitstopTime.level = 0;
         passiveIncome.level = 0;
+        nitro.level = 0;
 
         if (economy == null)
             economy = FindAnyObjectByType<EconomyManager>();
@@ -70,6 +77,8 @@ public class UpgradeManager : MonoBehaviour
     public int GetPitstopTimeCost() => GetCost(pitstopTime.baseCost, pitstopTime.level);
 
     public int GetPassiveIncomeCost() => GetCost(passiveIncome.baseCost, passiveIncome.level);
+
+    public int GetNitroCost() => GetCost(nitro.baseCost, nitro.level);
 
     // =========================
     // BUY METHODS
@@ -146,6 +155,15 @@ public class UpgradeManager : MonoBehaviour
         );
     }
 
+    public void BuyNitroUpgrade()
+    {
+        TryBuy(
+            ref nitro.level,
+            nitro.maxLevel,
+            GetNitroCost()
+        );
+    }
+
     // =========================
     // APPLY
     // =========================
@@ -176,6 +194,10 @@ public class UpgradeManager : MonoBehaviour
             passiveIncome.level <= 0
                 ? 0
                 : 10 + (passiveIncome.level - 1) * 5;
+
+        // +1s nitro
+        nitroCapacity = nitro.level > 0 ? 1f + nitro.level : 0;
+        nitroMultiplier = 1.5f;
 
         Debug.Log(
             $"Speed x{speedMultiplier} | " +

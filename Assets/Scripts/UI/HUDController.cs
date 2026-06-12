@@ -2,17 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Drives the on-screen HUD.
-///
-/// Required Canvas children (assign in Inspector or let FindObjectOfType handle it):
-///   txtCoins     – TMP label, e.g. "Money: 0"
-///   txtLap       – TMP label, e.g. "Lap: 0"
-///   txtSpeed     – TMP label, e.g. "0 km/h"
-///   txtHint      – TMP label "TAP TO START" / disappears after first tap
-///   coinPopup    – TMP label for floating "+10" flash
-///   speedbar     – UnityEngine.UI.Slider (0–1, no interaction)
-/// </summary>
 public class HUDController : MonoBehaviour
 {
     [Header("Text Labels (TMPro)")]
@@ -29,6 +18,10 @@ public class HUDController : MonoBehaviour
     public TMP_Text txtPitstop;
     public Slider pitstopBar;
 
+    [Header("Nitro")]
+    public TMP_Text txtNitro;
+    public Slider nitroBar;
+
     [Header("Coin popup")]
     public float popupDuration = 1.2f;
 
@@ -37,6 +30,7 @@ public class HUDController : MonoBehaviour
     private EconomyManager _eco;
     private PitstopManager _pitstop;
     private float _displayedPitValue = 1f;
+    private float _displayedNitroValue = 1f;
     private float          _popupTimer;
     private bool           _hintShown = true;
 
@@ -52,15 +46,14 @@ public class HUDController : MonoBehaviour
         if (_car)
             _car.OnLapCompleted += OnLapCompleted;
 
-        if (pitstopBar)
-            pitstopBar.value = 1f;
-
         // Initial state
         SetCoins(0);
         SetLap(0);
-        if (txtHint)      txtHint.text = "W TO ACCELERATE\nA/D TO STEER";
+        if (txtHint)      txtHint.text = "W TO ACCELERATE\nA/D TO STEER\nLEFT SHIFT TO USE NITRO";
         if (txtCoinPopup) txtCoinPopup.gameObject.SetActive(false);
         if (speedBar)     speedBar.value = 0f;
+        if (pitstopBar)   pitstopBar.value = 1f;
+        if (nitroBar)     nitroBar.value = 0f;
     }
 
     private void OnDestroy()
@@ -105,6 +98,45 @@ public class HUDController : MonoBehaviour
 
                 txtPitstop.text =
                     $"{remaining / 1000f:0.0} km";
+            }
+        }
+
+        // Nitro 
+        bool hasNitro =
+            _car != null &&
+            _car.HasNitro;
+
+        if (nitroBar)
+            nitroBar.gameObject.SetActive(hasNitro);
+
+        if (txtNitro)
+            txtNitro.gameObject.SetActive(hasNitro);
+
+        if (hasNitro)
+        {
+            float targetNitro =
+                Mathf.Clamp01(
+                    _car.NitroAmount /
+                    _car.MaxNitro
+                );
+
+            _displayedNitroValue = Mathf.Lerp(
+                _displayedNitroValue,
+                targetNitro,
+                6f * Time.deltaTime
+            );
+
+            nitroBar.value = _displayedNitroValue;
+
+            if (_car.NitroAmount <= 0 && _car.NitroCooldown > 0f)
+            {
+                txtNitro.text =
+                    $"Cooldown {_car.NitroCooldown:F1} s";
+            }
+            else
+            {
+                txtNitro.text =
+                    $"{_car.NitroAmount:F1} s";
             }
         }
 

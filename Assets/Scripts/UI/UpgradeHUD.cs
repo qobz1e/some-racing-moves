@@ -23,6 +23,7 @@ public class UpgradeHUD : MonoBehaviour
     [SerializeField] private UpgradeUI durabilityUI;
     [SerializeField] private UpgradeUI pitstopTimeUI;
     [SerializeField] private UpgradeUI passiveIncomeUI;
+    [SerializeField] private UpgradeUI nitroUI;
 
     private void Start()
     {
@@ -32,6 +33,7 @@ public class UpgradeHUD : MonoBehaviour
         durabilityUI.button.onClick.AddListener(BuyDurability);
         pitstopTimeUI.button.onClick.AddListener(BuyPitstopTime);
         passiveIncomeUI.button.onClick.AddListener(BuyPassiveIncome);
+        nitroUI.button.onClick.AddListener(BuyNitro);
 
         economy.OnCoinsChanged += OnCoinsChanged;
 
@@ -57,6 +59,7 @@ public class UpgradeHUD : MonoBehaviour
         int durabilityCost = upgradeManager.GetDurabilityCost();
         int pitstopTimeCost = upgradeManager.GetPitstopTimeCost();
         int passiveIncomeCost = upgradeManager.GetPassiveIncomeCost();
+        int nitroCost = upgradeManager.GetNitroCost();
 
         UpdateButton(
             speedUI,
@@ -104,6 +107,14 @@ public class UpgradeHUD : MonoBehaviour
             upgradeManager.passiveIncome.maxLevel,
             passiveIncomeCost,
             economy.Coins >= passiveIncomeCost
+        );
+
+        UpdateButton(
+            nitroUI,
+            upgradeManager.nitro.level,
+            upgradeManager.nitro.maxLevel,
+            nitroCost,
+            economy.Coins >= nitroCost
         );
     }
 
@@ -178,6 +189,12 @@ public class UpgradeHUD : MonoBehaviour
     private void BuyPassiveIncome()
     {
         upgradeManager.BuyPassiveIncomeUpgrade();
+        Refresh();
+    }
+
+    private void BuyNitro()
+    {
+        upgradeManager.BuyNitroUpgrade();
         Refresh();
     }
 

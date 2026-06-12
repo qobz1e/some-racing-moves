@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 98fcacd2fb7a97448b48de7b74d4cac8
+guid: 9de26064e4f74ac4ebfeacf95367d97a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4226728495964450170
-    second: Asphalt_0
+      213: -5795471014280368065
+    second: Asphalt2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Asphalt_0
+      name: Asphalt2_0
       rect:
         serializedVersion: 2
         x: 0
@@ -108,15 +108,15 @@ TextureImporter:
         width: 1254
         height: 1254
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 682940cb3d4a755c0800000000000000
-      internalID: -4226728495964450170
+      spriteID: f30feb771d9529fa0800000000000000
+      internalID: -5795471014280368065
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: d6c45d6f015c6b54e92d37e8f3bfc2a9
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Asphalt_0: -4226728495964450170
+      Asphalt2_0: -5795471014280368065
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

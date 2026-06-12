@@ -46,6 +46,25 @@ public class CarController : MonoBehaviour
     private bool isOnRoad;
     float offRoadSpeedLimit = 3f;
 
+    // nitro usage
+    [SerializeField] private float nitroRechargeDelay = 5f;
+    [SerializeField] private float nitroRechargeDelay2 = 1f;
+
+    private float nitroCooldownTimer;
+    private bool IsUsingNitro =>
+        Keyboard.current.leftShiftKey.isPressed &&
+        NitroAmount > 0f &&
+        !pitstopManager.NeedsPitstop;
+    float NitroMultiplier =>
+            IsUsingNitro
+                ? upgradeManager.nitroMultiplier
+                : 1f;
+
+    public float NitroAmount { get; private set; }
+    public float MaxNitro => upgradeManager.nitroCapacity;
+    public bool HasNitro => upgradeManager.nitro.level > 0;
+    public float NitroCooldown => nitroCooldownTimer;
+
     //private float brakeFactor;
 
     void Update()
@@ -64,6 +83,35 @@ public class CarController : MonoBehaviour
             }
 
             return;
+        }
+
+        if (IsUsingNitro)
+        {
+            NitroAmount -= Time.deltaTime;
+
+            if (NitroAmount <= 0f)
+            {
+                nitroCooldownTimer = nitroRechargeDelay;
+            }
+            else
+            {
+                nitroCooldownTimer = nitroRechargeDelay2;
+            }
+                    
+        }
+        else
+        {
+            if (nitroCooldownTimer > 0f)
+            {
+                nitroCooldownTimer -= Time.deltaTime;
+            }
+            else
+            {
+                NitroAmount = Mathf.Min(
+                    NitroAmount + Time.deltaTime * 0.5f,
+                    upgradeManager.nitroCapacity
+                );
+            }
         }
 
         HandleAcceleration();
@@ -91,7 +139,7 @@ public class CarController : MonoBehaviour
 
     void HandleAcceleration()
     {
-        float accel = Accel;
+        float accel = Accel * NitroMultiplier;
 
         if (!IsOnRoad())
             accel *= 0.9f;
@@ -106,7 +154,8 @@ public class CarController : MonoBehaviour
 
         float currentLimit =
             (IsOnRoad() ? MaxSpeed : offRoadSpeedLimit)
-            * pitstopManager.SpeedMultiplier;
+            * pitstopManager.SpeedMultiplier
+            * NitroMultiplier;
 
         float speed = moveForce.magnitude;
 
