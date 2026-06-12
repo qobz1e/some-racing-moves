@@ -129,7 +129,7 @@ public class TrackRenderer : MonoBehaviour
 
         float width = trackWidth + borderWidth;
 
-        float uvScale = 0.05f;
+        float uvScale = 0.03f;
 
         for (int i = 0; i < n; i++)
         {
