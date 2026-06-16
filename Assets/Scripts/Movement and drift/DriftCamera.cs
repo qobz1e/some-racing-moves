@@ -5,13 +5,13 @@ public class DriftCamera : MonoBehaviour
     [SerializeField] private CarController car;
     [SerializeField] private Transform target;
 
-    [Header("Normal")]
-    [SerializeField] private float normalSize = 10f;
-
-    [Header("Drift")]
-    [SerializeField] private float driftSize = 6f;
-
+    [Header("Camera")]
+    [SerializeField] private float fixedSize = 8f;
     [SerializeField] private float smooth = 4f;
+
+    [Header("Camera Bounds")]
+    [SerializeField] private Vector2 minBounds;
+    [SerializeField] private Vector2 maxBounds;
 
     private Camera cam;
 
@@ -25,22 +25,34 @@ public class DriftCamera : MonoBehaviour
         if (target == null || car == null)
             return;
 
-        transform.position =
-            new Vector3(
-                target.position.x,
-                target.position.y,
-                -10f
-            );
+        Vector3 desiredPosition = new Vector3(
+            target.position.x,
+            target.position.y,
+            -10f
+        );
 
-        bool drifting = car.IsDrifting;
+        float vertExtent = cam.orthographicSize;
+        float horzExtent = vertExtent * cam.aspect;
 
-        float targetSize =
-            drifting ? driftSize : normalSize;
+        // clamp position inside bounds
+        desiredPosition.x = Mathf.Clamp(
+            desiredPosition.x,
+            minBounds.x + horzExtent,
+            maxBounds.x - horzExtent
+        );
+
+        desiredPosition.y = Mathf.Clamp(
+            desiredPosition.y,
+            minBounds.y + vertExtent,
+            maxBounds.y - vertExtent
+        );
+
+        transform.position = desiredPosition;
 
         cam.orthographicSize =
             Mathf.Lerp(
                 cam.orthographicSize,
-                targetSize,
+                fixedSize,
                 smooth * Time.unscaledDeltaTime
             );
     }

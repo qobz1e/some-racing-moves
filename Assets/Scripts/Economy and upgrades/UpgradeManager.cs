@@ -37,7 +37,6 @@ public class UpgradeManager : MonoBehaviour
     public int passiveIncomeAmount;
 
     public float nitroCapacity;
-    public float nitroMultiplier;
 
     private void Awake()
     {
@@ -182,11 +181,11 @@ public class UpgradeManager : MonoBehaviour
         driftMoneyMultiplier =
             1f + driftMoney.level * 0.3f;
 
-        // +1km to base durability
+        // +1 km to base durability
         durability = 
             1000f + durabilityX.level * 500f;
 
-        // -1s from base duration
+        // -1 s from base duration
         pitstopDuration = 10f - pitstopTime.level;
 
         // +5 coins per 3s
@@ -195,17 +194,22 @@ public class UpgradeManager : MonoBehaviour
                 ? 0
                 : 10 + (passiveIncome.level - 1) * 5;
 
-        // +1s nitro
-        nitroCapacity = nitro.level > 0 ? 1f + nitro.level : 0;
-        nitroMultiplier = 1.5f;
+        // +0.5 s nitro per level
+        nitroCapacity = nitro.level > 0 ? 0.5f + nitro.level / 2f : 0;
 
-        Debug.Log(
+        string debugText =
             $"Speed x{speedMultiplier} | " +
             $"Lap x{lapMoneyMultiplier} | " +
             $"Drift x{driftMoneyMultiplier} | " +
             $"Durability {durability} m | " +
-            $"Pitstop {pitstopDuration}s | " +
-            $"Passive {passiveIncomeAmount} coins"
-        );
+            $"Pitstop {pitstopDuration} s";
+
+        if (passiveIncomeAmount > 0)
+            debugText += $" | Passive {passiveIncomeAmount} coins";
+
+        if (nitroCapacity > 0)
+            debugText += $" | Nitro {nitroCapacity} s";
+
+        Debug.Log(debugText);
     }
 }

@@ -5,13 +5,19 @@ public class CarController : MonoBehaviour
 {
     [SerializeField] private UpgradeManager upgradeManager;
     [SerializeField] private PitstopManager pitstopManager;
+    [SerializeField] private Rigidbody2D rb;
 
     [Header("Movement")]
-    public float acceleration = 15f;
-    public float maxSpeed = 6f;
-    public float drag = 2f;
+    [SerializeField] public float acceleration = 10.5f;
+    [SerializeField] public float maxSpeed = 6f;
+    [SerializeField] private float reverseAcceleration = 9f;
+    [SerializeField] private float reverseSpeed = 3f;
+    [SerializeField] private float coastDrag = 2f;
+    [SerializeField] private float throttleDrag = 0.5f;
+    [SerializeField] private AnimationCurve accelerationCurve =
+        AnimationCurve.EaseInOut(0, 0.35f, 1, 0.3f);
 
-    [SerializeField] private float wallBounce = 1f;
+    [SerializeField] private float wallBounce = 0.3f;
 
     private Vector2 moveForce;
     float Accel => acceleration * upgradeManager.speedMultiplier;
@@ -22,7 +28,7 @@ public class CarController : MonoBehaviour
     public float steerAngle = 30f;
 
     [Header("Drift")]
-    public float traction = 0.1f;
+    public float traction = 0.5f;
     [SerializeField] private TrailRenderer leftTrail;
     [SerializeField] private TrailRenderer rightTrail;
 
@@ -46,21 +52,19 @@ public class CarController : MonoBehaviour
     private bool isOnRoad;
     float offRoadSpeedLimit = 3f;
 
-    // nitro usage
+    [Header("Nitro")]
+    [SerializeField] private float nitroBoostForce = 16f;
     [SerializeField] private float nitroRechargeDelay = 5f;
     [SerializeField] private float nitroRechargeDelay2 = 1f;
 
+    public float NitroAmount { get; private set; }
     private float nitroCooldownTimer;
+
     private bool IsUsingNitro =>
         Keyboard.current.leftShiftKey.isPressed &&
         NitroAmount > 0f &&
         !pitstopManager.NeedsPitstop;
-    float NitroMultiplier =>
-            IsUsingNitro
-                ? upgradeManager.nitroMultiplier
-                : 1f;
-
-    public float NitroAmount { get; private set; }
+    
     public float MaxNitro => upgradeManager.nitroCapacity;
     public bool HasNitro => upgradeManager.nitro.level > 0;
     public float NitroCooldown => nitroCooldownTimer;
@@ -87,7 +91,8 @@ public class CarController : MonoBehaviour
 
         if (IsUsingNitro)
         {
-            NitroAmount -= Time.deltaTime;
+            ActivateNitro();
+            NitroAmount -= Time.deltaTime;   
 
             if (NitroAmount <= 0f)
             {
@@ -97,7 +102,7 @@ public class CarController : MonoBehaviour
             {
                 nitroCooldownTimer = nitroRechargeDelay2;
             }
-                    
+
         }
         else
         {
@@ -118,7 +123,6 @@ public class CarController : MonoBehaviour
         HandleSteering();
         HandleDrag(); 
         HandleDriftPhysics();
-        Move();
 
         void UpdateSkidMarks()
         {
@@ -135,27 +139,45 @@ public class CarController : MonoBehaviour
         UpdateSkidMarks();
     }
 
+    void FixedUpdate()
+    {
+        if (moveForce.magnitude < 0.1f)
+        {
+            rb.angularVelocity = 0f;
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        Move();
+    }
+
     // ─────────────────────────────
 
     void HandleAcceleration()
     {
-        float accel = Accel * NitroMultiplier;
+        float speedRatio = moveForce.magnitude / MaxSpeed;
 
-        if (!IsOnRoad())
-            accel *= 0.9f;
+        float accel = Accel * accelerationCurve.Evaluate(speedRatio);
 
-        if (pitstopManager.NeedsPitstop)
-            accel *= 0.8f;
+        if (!IsOnRoad()) accel *= 0.9f;
+
+        if (pitstopManager.NeedsPitstop) accel *= 0.8f;
 
         if (Keyboard.current.wKey.isPressed)
         {
             moveForce += (Vector2)transform.up * accel * Time.deltaTime;
         }
 
+        if (Keyboard.current.sKey.isPressed)
+        {
+            moveForce -= (Vector2)transform.up * reverseAcceleration * Time.deltaTime;
+        }
+
         float currentLimit =
             (IsOnRoad() ? MaxSpeed : offRoadSpeedLimit)
-            * pitstopManager.SpeedMultiplier
-            * NitroMultiplier;
+            * pitstopManager.SpeedMultiplier;
+
+        if (IsUsingNitro)
+            currentLimit *= 1.5f;
 
         float speed = moveForce.magnitude;
 
@@ -163,6 +185,15 @@ public class CarController : MonoBehaviour
         {
             moveForce = moveForce.normalized *
                 Mathf.MoveTowards(speed, currentLimit, 6f * Time.deltaTime);
+        }
+
+        if (speed < -reverseSpeed)
+        {
+            Vector2 lateral =
+                moveForce - (Vector2)transform.up * speed;
+
+            moveForce =
+                lateral + (Vector2)transform.up * (-reverseSpeed);
         }
     }
 
@@ -178,9 +209,15 @@ public class CarController : MonoBehaviour
         if (Keyboard.current.dKey.isPressed)
             steerInput = -1f;
 
+        float direction =
+            Mathf.Sign(
+                Vector2.Dot(moveForce, transform.up)
+            );
+
         transform.Rotate(
             Vector3.forward,
             steerInput *
+            direction *
             moveForce.magnitude *
             steerAngle *
             Time.deltaTime
@@ -191,11 +228,18 @@ public class CarController : MonoBehaviour
 
     void HandleDrag()
     {
-        float dt = Time.deltaTime;
+        float currentDrag =
+            Keyboard.current.wKey.isPressed
+                ? throttleDrag
+                : coastDrag;
 
-        float decay = Mathf.Clamp01(drag * dt);
+        float decay = Mathf.Clamp01(currentDrag * Time.deltaTime);
 
-        moveForce = Vector2.Lerp(moveForce, Vector2.zero, decay);
+        moveForce = Vector2.Lerp(
+            moveForce,
+            Vector2.zero,
+            decay
+        );
     }
 
     // ─────────────────────────────
@@ -243,9 +287,14 @@ public class CarController : MonoBehaviour
     {
         Vector3 delta = (Vector3)moveForce * Time.deltaTime;
 
-        transform.position += delta;
+        rb.MovePosition(rb.position + (Vector2)delta);
 
         TotalDistance += delta.magnitude * 3;
+    }
+
+    private void ActivateNitro()
+    {
+        moveForce += (Vector2)transform.up * nitroBoostForce * Time.deltaTime;
     }
 
     // ─────────────────────────────
