@@ -22,6 +22,7 @@ public class UpgradeManager : MonoBehaviour
     public UpgradeData pitstopTime;
     public UpgradeData passiveIncome;
     public UpgradeData nitro;
+    public UpgradeData aerodynamics;
 
     [Header("Cost Scaling")]
     public float costMultiplier = 1.6f;
@@ -38,6 +39,8 @@ public class UpgradeManager : MonoBehaviour
 
     public float nitroCapacity;
 
+    public float throttleDecrease;
+
     private void Awake()
     {
         speed.level = 0;
@@ -47,6 +50,7 @@ public class UpgradeManager : MonoBehaviour
         pitstopTime.level = 0;
         passiveIncome.level = 0;
         nitro.level = 0;
+        aerodynamics.level = 0;
 
         if (economy == null)
             economy = FindAnyObjectByType<EconomyManager>();
@@ -78,6 +82,8 @@ public class UpgradeManager : MonoBehaviour
     public int GetPassiveIncomeCost() => GetCost(passiveIncome.baseCost, passiveIncome.level);
 
     public int GetNitroCost() => GetCost(nitro.baseCost, nitro.level);
+
+    public int GetAerodynamicsCost() => GetCost(aerodynamics.baseCost, aerodynamics.level);
 
     // =========================
     // BUY METHODS
@@ -163,6 +169,15 @@ public class UpgradeManager : MonoBehaviour
         );
     }
 
+    public void BuyAerodynamicsUpgrade()
+    {
+        TryBuy(
+            ref aerodynamics.level,
+            aerodynamics.maxLevel,
+            GetAerodynamicsCost()
+        );
+    }
+
     // =========================
     // APPLY
     // =========================
@@ -197,6 +212,9 @@ public class UpgradeManager : MonoBehaviour
         // +0.5 s nitro per level
         nitroCapacity = nitro.level > 0 ? 0.5f + nitro.level / 2f : 0;
 
+        // -0.02 throttle drag per level
+        throttleDecrease = aerodynamics.level * 0.02f;
+
         string debugText =
             $"Speed x{speedMultiplier} | " +
             $"Lap x{lapMoneyMultiplier} | " +
@@ -204,11 +222,14 @@ public class UpgradeManager : MonoBehaviour
             $"Durability {durability} m | " +
             $"Pitstop {pitstopDuration} s";
 
-        if (passiveIncomeAmount > 0)
+        if (passiveIncome.level > 0)
             debugText += $" | Passive {passiveIncomeAmount} coins";
 
-        if (nitroCapacity > 0)
+        if (nitro.level > 0)
             debugText += $" | Nitro {nitroCapacity} s";
+
+        if (aerodynamics.level > 0)
+            debugText += $" | Drag reduced by {aerodynamics.level * 4}%";
 
         Debug.Log(debugText);
     }

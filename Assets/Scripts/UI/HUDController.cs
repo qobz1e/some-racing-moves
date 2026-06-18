@@ -14,10 +14,6 @@ public class HUDController : MonoBehaviour
     [Header("Speed bar")]
     public Slider speedBar;
 
-    [Header("Pit Stop")]
-    public TMP_Text txtPitstop;
-    public Slider pitstopBar;
-
     [Header("Nitro")]
     public TMP_Text txtNitro;
     public Slider nitroBar;
@@ -28,8 +24,6 @@ public class HUDController : MonoBehaviour
     // ── Private refs ──────────────────────────────────────────────────────────
     private CarController _car;
     private EconomyManager _eco;
-    private PitstopManager _pitstop;
-    private float _displayedPitValue = 1f;
     private float _displayedNitroValue = 1f;
     private float          _popupTimer;
     private bool           _hintShown = true;
@@ -38,7 +32,6 @@ public class HUDController : MonoBehaviour
     {
         _car = FindAnyObjectByType<CarController>();
         _eco = FindAnyObjectByType<EconomyManager>();
-        _pitstop = FindAnyObjectByType<PitstopManager>();
 
         if (_eco)
             _eco.OnCoinsChanged += OnCoinsChanged;
@@ -52,7 +45,6 @@ public class HUDController : MonoBehaviour
         if (txtHint)      txtHint.text = "W TO ACCELERATE\nA/D TO STEER\nLEFT SHIFT TO USE NITRO";
         if (txtCoinPopup) txtCoinPopup.gameObject.SetActive(false);
         if (speedBar)     speedBar.value = 0f;
-        if (pitstopBar)   pitstopBar.value = 1f;
         if (nitroBar)     nitroBar.value = 0f;
     }
 
@@ -70,36 +62,6 @@ public class HUDController : MonoBehaviour
         float ratio = _car.MaxSpeed > 0 ? _car.CurrentSpeed / _car.MaxSpeed : 0f;
         if (speedBar) speedBar.value = ratio;
         if (txtSpeed) txtSpeed.text  = $"{_car.CurrentSpeed * 10f:F0} km/h";
-
-        // Remaining distance before pitstop
-        if (_pitstop != null)
-        {
-            float targetValue =
-                Mathf.Clamp01(
-                    1f - _car.TotalDistance / _pitstop.serviceDistance
-                );
-
-            _displayedPitValue = Mathf.Lerp(
-                _displayedPitValue,
-                targetValue,
-                3f * Time.deltaTime
-            );
-
-            if (pitstopBar)
-                pitstopBar.value = _displayedPitValue;
-
-            if (txtPitstop)
-            {
-                float remaining =
-                    Mathf.Max(
-                        0f,
-                        _pitstop.serviceDistance - _car.TotalDistance
-                    );
-
-                txtPitstop.text =
-                    $"{remaining / 1000f:0.0} km";
-            }
-        }
 
         // Nitro 
         bool hasNitro =

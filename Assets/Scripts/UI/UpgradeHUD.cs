@@ -20,20 +20,18 @@ public class UpgradeHUD : MonoBehaviour
     [SerializeField] private UpgradeUI speedUI;
     [SerializeField] private UpgradeUI lapMoneyUI;
     [SerializeField] private UpgradeUI driftMoneyUI;
-    [SerializeField] private UpgradeUI durabilityUI;
-    [SerializeField] private UpgradeUI pitstopTimeUI;
     [SerializeField] private UpgradeUI passiveIncomeUI;
     [SerializeField] private UpgradeUI nitroUI;
+    [SerializeField] private UpgradeUI aerodynamicsUI;
 
     private void Start()
     {
         speedUI.button.onClick.AddListener(BuySpeed);
         lapMoneyUI.button.onClick.AddListener(BuyLap);
         driftMoneyUI.button.onClick.AddListener(BuyDrift);
-        durabilityUI.button.onClick.AddListener(BuyDurability);
-        pitstopTimeUI.button.onClick.AddListener(BuyPitstopTime);
         passiveIncomeUI.button.onClick.AddListener(BuyPassiveIncome);
         nitroUI.button.onClick.AddListener(BuyNitro);
+        aerodynamicsUI.button.onClick.AddListener(BuyAerodynamics);
 
         economy.OnCoinsChanged += OnCoinsChanged;
 
@@ -56,10 +54,9 @@ public class UpgradeHUD : MonoBehaviour
         int speedCost = upgradeManager.GetSpeedCost();
         int lapCost = upgradeManager.GetLapMoneyCost();
         int driftCost = upgradeManager.GetDriftMoneyCost();
-        int durabilityCost = upgradeManager.GetDurabilityCost();
-        int pitstopTimeCost = upgradeManager.GetPitstopTimeCost();
         int passiveIncomeCost = upgradeManager.GetPassiveIncomeCost();
         int nitroCost = upgradeManager.GetNitroCost();
+        int aerodynamicsCost = upgradeManager.GetAerodynamicsCost();
 
         UpdateButton(
             speedUI,
@@ -86,22 +83,6 @@ public class UpgradeHUD : MonoBehaviour
         );
 
         UpdateButton(
-            durabilityUI,
-            upgradeManager.durabilityX.level,
-            upgradeManager.durabilityX.maxLevel,
-            durabilityCost,
-            economy.Coins >= durabilityCost
-        );
-
-        UpdateButton(
-            pitstopTimeUI,
-            upgradeManager.pitstopTime.level,
-            upgradeManager.pitstopTime.maxLevel,
-            pitstopTimeCost,
-            economy.Coins >= pitstopTimeCost
-        );
-
-        UpdateButton(
             passiveIncomeUI,
             upgradeManager.passiveIncome.level,
             upgradeManager.passiveIncome.maxLevel,
@@ -115,6 +96,14 @@ public class UpgradeHUD : MonoBehaviour
             upgradeManager.nitro.maxLevel,
             nitroCost,
             economy.Coins >= nitroCost
+        );
+
+        UpdateButton(
+            aerodynamicsUI,
+            upgradeManager.aerodynamics.level,
+            upgradeManager.aerodynamics.maxLevel,
+            aerodynamicsCost,
+            economy.Coins >= aerodynamicsCost
         );
     }
 
@@ -174,18 +163,6 @@ public class UpgradeHUD : MonoBehaviour
         Refresh();
     }
 
-    private void BuyDurability()
-    {
-        upgradeManager.BuyDurabilityUpgrade();
-        Refresh();
-    }
-
-    private void BuyPitstopTime()
-    {
-        upgradeManager.BuyPitstopTimeUpgrade();
-        Refresh();
-    }
-
     private void BuyPassiveIncome()
     {
         upgradeManager.BuyPassiveIncomeUpgrade();
@@ -195,6 +172,12 @@ public class UpgradeHUD : MonoBehaviour
     private void BuyNitro()
     {
         upgradeManager.BuyNitroUpgrade();
+        Refresh();
+    }
+
+    private void BuyAerodynamics()
+    {
+        upgradeManager.BuyAerodynamicsUpgrade();
         Refresh();
     }
 

@@ -4,43 +4,57 @@ using UnityEngine.InputSystem;
 public class CarController : MonoBehaviour
 {
     [SerializeField] private UpgradeManager upgradeManager;
-    [SerializeField] private PitstopManager pitstopManager;
     [SerializeField] private Rigidbody2D rb;
 
     [Header("Movement")]
     [SerializeField] public float acceleration = 10.5f;
     [SerializeField] public float maxSpeed = 6f;
+
     [SerializeField] private float reverseAcceleration = 9f;
     [SerializeField] private float reverseSpeed = 3f;
-    [SerializeField] private float coastDrag = 2f;
-    [SerializeField] private float throttleDrag = 0.5f;
+
     [SerializeField] private AnimationCurve accelerationCurve =
         AnimationCurve.EaseInOut(0, 0.35f, 1, 0.3f);
 
-    [SerializeField] private float wallBounce = 0.3f;
-
+    float accelerationInput;
     private Vector2 moveForce;
     float Accel => acceleration * upgradeManager.speedMultiplier;
+    float dragReduce => upgradeManager.throttleDecrease;
     public float CurrentSpeed => moveForce.magnitude;
     public float MaxSpeed => maxSpeed * upgradeManager.speedMultiplier;
 
     [Header("Steering")]
     public float steerAngle = 30f;
+    float steerInput;
 
     [Header("Drift")]
     public float traction = 0.5f;
-    [SerializeField] private TrailRenderer leftTrail;
-    [SerializeField] private TrailRenderer rightTrail;
 
     public bool IsDrifting { get; private set; }
     public float DriftAngle { get; private set; }
     private float driftGraceTimer;
 
-    // pitstops
-    public float TotalDistance { get; private set; }
-    public bool IsInPitstop { get; private set; }
-    public bool NeedsPitstop => pitstopManager.NeedsPitstop;
-    private float pitstopTimer;
+    [Header("Nitro")]
+    [SerializeField] private float nitroBoostForce = 16f;
+    [SerializeField] private float nitroRechargeDelay = 5f;
+    [SerializeField] private float nitroRechargeDelay2 = 1f;
+
+    [Header("Some Constraints")]
+    [SerializeField] private float coastDrag = 2.5f;
+    [SerializeField] private float throttleDrag = 0.5f;
+    [SerializeField] private float offRoadDrag = 0.8f;
+    [SerializeField] private float wallBounce = 0.3f;
+
+    public float NitroAmount { get; private set; }
+    private float nitroCooldownTimer;
+
+    private bool IsUsingNitro =>
+        Keyboard.current.leftShiftKey.isPressed &&
+        NitroAmount > 0f;
+    
+    public float MaxNitro => upgradeManager.nitroCapacity;
+    public bool HasNitro => upgradeManager.nitro.level > 0;
+    public float NitroCooldown => nitroCooldownTimer;
 
     // lap completing
     public int LapCount { get; private set; }
@@ -50,45 +64,9 @@ public class CarController : MonoBehaviour
     // slowing down off the road
     private int roadContacts = 0;
     private bool isOnRoad;
-    float offRoadSpeedLimit = 3f;
-
-    [Header("Nitro")]
-    [SerializeField] private float nitroBoostForce = 16f;
-    [SerializeField] private float nitroRechargeDelay = 5f;
-    [SerializeField] private float nitroRechargeDelay2 = 1f;
-
-    public float NitroAmount { get; private set; }
-    private float nitroCooldownTimer;
-
-    private bool IsUsingNitro =>
-        Keyboard.current.leftShiftKey.isPressed &&
-        NitroAmount > 0f &&
-        !pitstopManager.NeedsPitstop;
-    
-    public float MaxNitro => upgradeManager.nitroCapacity;
-    public bool HasNitro => upgradeManager.nitro.level > 0;
-    public float NitroCooldown => nitroCooldownTimer;
-
-    //private float brakeFactor;
 
     void Update()
     {
-        //brakeFactor = Keyboard.current.spaceKey.isPressed ? 1f : 0f;
-
-        if (IsInPitstop)
-        {
-            pitstopTimer -= Time.deltaTime;
-
-            if (pitstopTimer <= 0f)
-            {
-                IsInPitstop = false;
-
-                pitstopManager.PerformPitstop();
-            }
-
-            return;
-        }
-
         if (IsUsingNitro)
         {
             ActivateNitro();
@@ -119,28 +97,15 @@ public class CarController : MonoBehaviour
             }
         }
 
-        HandleAcceleration();
-        HandleSteering();
         HandleDrag(); 
         HandleDriftPhysics();
-
-        void UpdateSkidMarks()
-        {
-            bool showSkid =
-                IsDrifting && moveForce.magnitude > 3f;
-
-            if (leftTrail != null)
-                leftTrail.emitting = showSkid;
-
-            if (rightTrail != null)
-                rightTrail.emitting = showSkid;
-        }
-
-        UpdateSkidMarks();
     }
 
     void FixedUpdate()
     {
+        HandleAcceleration();
+        HandleSteering();
+
         if (moveForce.magnitude < 0.1f)
         {
             rb.angularVelocity = 0f;
@@ -158,57 +123,56 @@ public class CarController : MonoBehaviour
 
         float accel = Accel * accelerationCurve.Evaluate(speedRatio);
 
-        if (!IsOnRoad()) accel *= 0.9f;
-
-        if (pitstopManager.NeedsPitstop) accel *= 0.8f;
-
-        if (Keyboard.current.wKey.isPressed)
+        if (accelerationInput > 0f)
         {
-            moveForce += (Vector2)transform.up * accel * Time.deltaTime;
+            moveForce += (Vector2)transform.up *
+                         accelerationInput *
+                         accel *
+                         Time.deltaTime;
+        }
+        else if (accelerationInput < 0f)
+        {
+            moveForce += (Vector2)transform.up *
+                         accelerationInput *
+                         reverseAcceleration *
+                         Time.deltaTime;
         }
 
-        if (Keyboard.current.sKey.isPressed)
+        if (!IsOnRoad())
         {
-            moveForce -= (Vector2)transform.up * reverseAcceleration * Time.deltaTime;
+            moveForce *= 1f - offRoadDrag * Time.deltaTime;
         }
 
-        float currentLimit =
-            (IsOnRoad() ? MaxSpeed : offRoadSpeedLimit)
-            * pitstopManager.SpeedMultiplier;
+        float currentLimit = MaxSpeed;
 
-        if (IsUsingNitro)
-            currentLimit *= 1.5f;
+        if (IsUsingNitro) currentLimit *= 1.5f;
 
-        float speed = moveForce.magnitude;
+        float speed = Vector2.Dot(moveForce, transform.up);
 
         if (speed > currentLimit)
         {
             moveForce = moveForce.normalized *
-                Mathf.MoveTowards(speed, currentLimit, 6f * Time.deltaTime);
+                        Mathf.MoveTowards(
+                            speed,
+                            currentLimit,
+                            6f * Time.deltaTime);
         }
 
         if (speed < -reverseSpeed)
         {
-            Vector2 lateral =
-                moveForce - (Vector2)transform.up * speed;
+            Vector2 lateral = moveForce - (Vector2)transform.up * speed;
 
-            moveForce =
-                lateral + (Vector2)transform.up * (-reverseSpeed);
+            moveForce = lateral + (Vector2)transform.up * (-reverseSpeed);
         }
     }
 
-    // ─────────────────────────────
+    void Move()
+    {
+        rb.MovePosition(rb.position + moveForce * Time.deltaTime);
+    }
 
     void HandleSteering()
     {
-        float steerInput = 0f;
-
-        if (Keyboard.current.aKey.isPressed)
-            steerInput = 1f;
-
-        if (Keyboard.current.dKey.isPressed)
-            steerInput = -1f;
-
         float direction =
             Mathf.Sign(
                 Vector2.Dot(moveForce, transform.up)
@@ -230,7 +194,7 @@ public class CarController : MonoBehaviour
     {
         float currentDrag =
             Keyboard.current.wKey.isPressed
-                ? throttleDrag
+                ? throttleDrag - dragReduce
                 : coastDrag;
 
         float decay = Mathf.Clamp01(currentDrag * Time.deltaTime);
@@ -256,15 +220,9 @@ public class CarController : MonoBehaviour
             return;
         }
 
-        DriftAngle =
-            Vector2.SignedAngle(forward, moveForce.normalized);
+        DriftAngle = Vector2.SignedAngle(forward, moveForce.normalized);
 
-        bool driftingNow =
-            IsOnRoad() &&
-            !IsInPitstop &&
-            !pitstopManager.NeedsPitstop &&
-            moveForce.magnitude > 3f &&
-            Mathf.Abs(DriftAngle) > 15f;
+        bool driftingNow = moveForce.magnitude > 3f && Mathf.Abs(DriftAngle) > 15f;
 
         if (driftingNow)
             driftGraceTimer = 0.3f;
@@ -283,37 +241,9 @@ public class CarController : MonoBehaviour
 
     // ─────────────────────────────
 
-    void Move()
-    {
-        Vector3 delta = (Vector3)moveForce * Time.deltaTime;
-
-        rb.MovePosition(rb.position + (Vector2)delta);
-
-        TotalDistance += delta.magnitude * 3;
-    }
-
     private void ActivateNitro()
     {
         moveForce += (Vector2)transform.up * nitroBoostForce * Time.deltaTime;
-    }
-
-    // ─────────────────────────────
-
-    public void ResetDistance()
-    {
-        TotalDistance = 0f;
-    }
-
-    public void StartPitstop()
-    {
-        if (IsInPitstop)
-            return;
-
-        IsInPitstop = true;
-        pitstopManager.StartService(upgradeManager.pitstopDuration);
-        pitstopTimer = upgradeManager.pitstopDuration;
-
-        moveForce = Vector2.zero;
     }
 
     // ─────────────────────────────
@@ -352,5 +282,13 @@ public class CarController : MonoBehaviour
     public void SetCheckpointPassed(bool value)
     {
         checkpointPassed = value;
+    }
+
+    // ─────────────────────────────
+
+    public void SetInputVector(Vector2 inputVector)
+    {
+        steerInput = -inputVector.x;
+        accelerationInput = inputVector.y;
     }
 }
