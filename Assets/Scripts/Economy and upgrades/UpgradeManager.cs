@@ -18,8 +18,6 @@ public class UpgradeManager : MonoBehaviour
     public UpgradeData speed;
     public UpgradeData lapMoney;
     public UpgradeData driftMoney;
-    public UpgradeData durabilityX;
-    public UpgradeData pitstopTime;
     public UpgradeData passiveIncome;
     public UpgradeData nitro;
     public UpgradeData aerodynamics;
@@ -32,9 +30,6 @@ public class UpgradeManager : MonoBehaviour
     public float lapMoneyMultiplier = 1f;
     public float driftMoneyMultiplier = 1f;
 
-    public float durability = 1000f;
-    public float pitstopDuration = 10f;
-
     public int passiveIncomeAmount;
 
     public float nitroCapacity;
@@ -46,8 +41,6 @@ public class UpgradeManager : MonoBehaviour
         speed.level = 0;
         lapMoney.level = 0;
         driftMoney.level = 0;
-        durabilityX.level = 0;
-        pitstopTime.level = 0;
         passiveIncome.level = 0;
         nitro.level = 0;
         aerodynamics.level = 0;
@@ -74,10 +67,6 @@ public class UpgradeManager : MonoBehaviour
     public int GetLapMoneyCost() => GetCost(lapMoney.baseCost, lapMoney.level);
 
     public int GetDriftMoneyCost() => GetCost(driftMoney.baseCost, driftMoney.level);
-
-    public int GetDurabilityCost() => GetCost(durabilityX.baseCost, durabilityX.level);
-
-    public int GetPitstopTimeCost() => GetCost(pitstopTime.baseCost, pitstopTime.level);
 
     public int GetPassiveIncomeCost() => GetCost(passiveIncome.baseCost, passiveIncome.level);
 
@@ -133,24 +122,6 @@ public class UpgradeManager : MonoBehaviour
         );
     }
 
-    public void BuyDurabilityUpgrade()
-    {
-        TryBuy(
-            ref durabilityX.level,
-            durabilityX.maxLevel,
-            GetDurabilityCost()
-        );
-    }
-
-    public void BuyPitstopTimeUpgrade()
-    {
-        TryBuy(
-            ref pitstopTime.level,
-            pitstopTime.maxLevel,
-            GetPitstopTimeCost()
-        );
-    }
-
     public void BuyPassiveIncomeUpgrade()
     {
         TryBuy(
@@ -196,13 +167,6 @@ public class UpgradeManager : MonoBehaviour
         driftMoneyMultiplier =
             1f + driftMoney.level * 0.3f;
 
-        // +1 km to base durability
-        durability = 
-            1000f + durabilityX.level * 500f;
-
-        // -1 s from base duration
-        pitstopDuration = 10f - pitstopTime.level;
-
         // +5 coins per 3s
         passiveIncomeAmount =
             passiveIncome.level <= 0
@@ -218,9 +182,7 @@ public class UpgradeManager : MonoBehaviour
         string debugText =
             $"Speed x{speedMultiplier} | " +
             $"Lap x{lapMoneyMultiplier} | " +
-            $"Drift x{driftMoneyMultiplier} | " +
-            $"Durability {durability} m | " +
-            $"Pitstop {pitstopDuration} s";
+            $"Drift x{driftMoneyMultiplier}";
 
         if (passiveIncome.level > 0)
             debugText += $" | Passive {passiveIncomeAmount} coins";

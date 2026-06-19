@@ -65,6 +65,10 @@ public class CarController : MonoBehaviour
     private int roadContacts = 0;
     private bool isOnRoad;
 
+    private float impactControlLoss = 0f;
+    private float steeringLoss = 0f;
+    private float tractionMultiplier = 1f;
+
     void Update()
     {
         if (IsUsingNitro)
@@ -113,6 +117,24 @@ public class CarController : MonoBehaviour
         }
 
         Move();
+
+        impactControlLoss = Mathf.MoveTowards(
+            impactControlLoss,
+            0f,
+            Time.deltaTime * 0.2f
+        );
+
+        steeringLoss = Mathf.MoveTowards(
+            steeringLoss,
+            0f,
+            Time.deltaTime * 0.2f
+        );
+
+        tractionMultiplier = Mathf.MoveTowards(
+            tractionMultiplier,
+            1f,
+            Time.deltaTime * 0.2f
+        );
     }
 
     // ─────────────────────────────
@@ -125,9 +147,17 @@ public class CarController : MonoBehaviour
 
         if (accelerationInput > 0f)
         {
-            moveForce += (Vector2)transform.up *
+            float control = 1f - impactControlLoss;
+
+            Vector2 forward = transform.up;
+
+            Vector2 controlDir =
+                Vector2.Lerp(forward, moveForce.normalized, 0.3f * impactControlLoss);
+
+            moveForce += controlDir *
                          accelerationInput *
                          accel *
+                         control *
                          Time.deltaTime;
         }
         else if (accelerationInput < 0f)
@@ -178,9 +208,13 @@ public class CarController : MonoBehaviour
                 Vector2.Dot(moveForce, transform.up)
             );
 
+        float steerPower =
+            1f - steeringLoss;
+
         transform.Rotate(
             Vector3.forward,
             steerInput *
+            steerPower *
             direction *
             moveForce.magnitude *
             steerAngle *
@@ -193,7 +227,7 @@ public class CarController : MonoBehaviour
     void HandleDrag()
     {
         float currentDrag =
-            Keyboard.current.wKey.isPressed
+             Mathf.Abs(accelerationInput) > 0.01f
                 ? throttleDrag - dragReduce
                 : coastDrag;
 
@@ -235,7 +269,9 @@ public class CarController : MonoBehaviour
             Vector2.Lerp(
                 moveForce,
                 forward * moveForce.magnitude,
-                traction * Time.deltaTime
+                traction *
+                tractionMultiplier *
+                Time.deltaTime
             );
     }
 
@@ -250,8 +286,66 @@ public class CarController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D col)
     {
-        Vector2 normal = col.contacts[0].normal;
-        moveForce = Vector2.Reflect(moveForce, normal) * wallBounce;
+        Rigidbody2D otherRb = col.rigidbody;
+        if (otherRb == null) return;
+
+        ContactPoint2D contact = col.GetContact(0);
+
+        Vector2 normal = contact.normal;
+
+        Vector2 relativeVelocity =
+            rb.linearVelocity - otherRb.linearVelocity;
+
+        float impactStrength =
+            Vector2.Dot(relativeVelocity, normal);
+
+        if (impactStrength > 0f)
+            return;
+
+        impactStrength = Mathf.Abs(impactStrength);
+
+        impactControlLoss =
+            Mathf.Clamp01(
+                impactStrength * 0.15f);
+
+        steeringLoss =
+            Mathf.Clamp01(
+                impactStrength * 0.12f);
+
+        tractionMultiplier = 0.15f;
+
+        impactControlLoss = 
+            Mathf.Clamp(
+                impactControlLoss + 
+                impactStrength * 0.2f,
+                0f, 1f);
+
+        float impulseStrength = impactStrength * 1.5f;
+
+        Vector2 impulse = normal * impulseStrength;
+
+        moveForce -= impulse * 0.5f;
+        otherRb.AddForce(impulse, ForceMode2D.Impulse);
+
+        // ==============================
+        // SPIN EFFECT
+        // ==============================
+
+        Vector2 hitPoint = contact.point;
+        Vector2 center = rb.worldCenterOfMass;
+
+        Vector2 offset = hitPoint - center;
+
+        float torqueDir = Mathf.Sign(
+            offset.x * normal.y - offset.y * normal.x
+        );
+
+        float spinStrength =
+            impactStrength * 1.2f * offset.magnitude;
+
+        rb.angularVelocity += torqueDir * spinStrength;
+
+        otherRb.angularVelocity -= torqueDir * spinStrength * 0.5f;
     }
 
     private void OnTriggerEnter2D(Collider2D col)
@@ -291,4 +385,9 @@ public class CarController : MonoBehaviour
         steerInput = -inputVector.x;
         accelerationInput = inputVector.y;
     }
+
+    public Vector2 VelocityDirection =>
+    moveForce.sqrMagnitude > 0.01f
+        ? moveForce.normalized
+        : (Vector2)transform.up;
 }

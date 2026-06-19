@@ -4,6 +4,9 @@ using TMPro;
 
 public class HUDController : MonoBehaviour
 {
+    [SerializeField] private CarController _car;
+    [SerializeField] private EconomyManager _eco;
+
     [Header("Text Labels (TMPro)")]
     public TMP_Text txtCoins;
     public TMP_Text txtLap;
@@ -22,17 +25,12 @@ public class HUDController : MonoBehaviour
     public float popupDuration = 1.2f;
 
     // ── Private refs ──────────────────────────────────────────────────────────
-    private CarController _car;
-    private EconomyManager _eco;
     private float _displayedNitroValue = 1f;
     private float          _popupTimer;
     private bool           _hintShown = true;
 
     private void Start()
     {
-        _car = FindAnyObjectByType<CarController>();
-        _eco = FindAnyObjectByType<EconomyManager>();
-
         if (_eco)
             _eco.OnCoinsChanged += OnCoinsChanged;
 
