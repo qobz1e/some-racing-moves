@@ -51,7 +51,7 @@ public class CarController : MonoBehaviour
 
     private bool nitroInput;
 
-    private bool IsUsingNitro =>
+    public bool IsUsingNitro =>
         nitroInput &&
         NitroAmount > 0f;
 
