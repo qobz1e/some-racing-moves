@@ -23,6 +23,8 @@ public class CarController : MonoBehaviour
     public float CurrentSpeed => moveForce.magnitude;
     public float MaxSpeed => maxSpeed * upgradeManager.speedMultiplier;
 
+    public bool IsReversing { get; private set; }
+
     [Header("Steering")]
     public float steerAngle = 30f;
     float steerInput;
@@ -43,15 +45,16 @@ public class CarController : MonoBehaviour
     [SerializeField] private float coastDrag = 2.5f;
     [SerializeField] private float throttleDrag = 0.5f;
     [SerializeField] private float offRoadDrag = 0.8f;
-    [SerializeField] private float wallBounce = 0.3f;
 
     public float NitroAmount { get; private set; }
     private float nitroCooldownTimer;
 
+    private bool nitroInput;
+
     private bool IsUsingNitro =>
-        Keyboard.current.leftShiftKey.isPressed &&
+        nitroInput &&
         NitroAmount > 0f;
-    
+
     public float MaxNitro => upgradeManager.nitroCapacity;
     public bool HasNitro => upgradeManager.nitro.level > 0;
     public float NitroCooldown => nitroCooldownTimer;
@@ -108,6 +111,9 @@ public class CarController : MonoBehaviour
     void FixedUpdate()
     {
         HandleAcceleration();
+
+        UpdateDirectionState();
+
         HandleSteering();
 
         if (moveForce.magnitude < 0.1f)
@@ -147,17 +153,9 @@ public class CarController : MonoBehaviour
 
         if (accelerationInput > 0f)
         {
-            float control = 1f - impactControlLoss;
-
-            Vector2 forward = transform.up;
-
-            Vector2 controlDir =
-                Vector2.Lerp(forward, moveForce.normalized, 0.3f * impactControlLoss);
-
-            moveForce += controlDir *
+            moveForce += (Vector2)transform.up *
                          accelerationInput *
                          accel *
-                         control *
                          Time.deltaTime;
         }
         else if (accelerationInput < 0f)
@@ -172,6 +170,9 @@ public class CarController : MonoBehaviour
         {
             moveForce *= 1f - offRoadDrag * Time.deltaTime;
         }
+
+        if (IsReversing)
+            moveForce *= 0.97f;
 
         float currentLimit = MaxSpeed;
 
@@ -196,6 +197,7 @@ public class CarController : MonoBehaviour
         }
     }
 
+
     void Move()
     {
         rb.MovePosition(rb.position + moveForce * Time.deltaTime);
@@ -203,18 +205,25 @@ public class CarController : MonoBehaviour
 
     void HandleSteering()
     {
-        float direction =
-            Mathf.Sign(
-                Vector2.Dot(moveForce, transform.up)
-            );
+        float forwardDot = Vector2.Dot(moveForce, transform.up);
 
-        float steerPower =
-            1f - steeringLoss;
+        float direction = Mathf.Sign(forwardDot);
+
+        if (Mathf.Abs(forwardDot) < 0.05f)
+            direction = 1f;
+
+        float steerPower = 1f - steeringLoss;
+
+        float reverseMultiplier =
+            direction < 0f
+                ? 0.6f
+                : 1f;
 
         transform.Rotate(
             Vector3.forward,
             steerInput *
             steerPower *
+            reverseMultiplier *
             direction *
             moveForce.magnitude *
             steerAngle *
@@ -256,7 +265,10 @@ public class CarController : MonoBehaviour
 
         DriftAngle = Vector2.SignedAngle(forward, moveForce.normalized);
 
-        bool driftingNow = moveForce.magnitude > 3f && Mathf.Abs(DriftAngle) > 15f;
+        bool driftingNow =
+            !IsReversing &&
+            moveForce.magnitude > 3f &&
+            Mathf.Abs(DriftAngle) > 15f;
 
         if (driftingNow)
             driftGraceTimer = 0.3f;
@@ -269,9 +281,7 @@ public class CarController : MonoBehaviour
             Vector2.Lerp(
                 moveForce,
                 forward * moveForce.magnitude,
-                traction *
-                tractionMultiplier *
-                Time.deltaTime
+                traction * Time.deltaTime
             );
     }
 
@@ -386,8 +396,26 @@ public class CarController : MonoBehaviour
         accelerationInput = inputVector.y;
     }
 
+    public void SetNitroInput(bool value)
+    {
+        nitroInput = value;
+    }
+
     public Vector2 VelocityDirection =>
-    moveForce.sqrMagnitude > 0.01f
-        ? moveForce.normalized
-        : (Vector2)transform.up;
+        moveForce.sqrMagnitude > 0.01f
+            ? moveForce.normalized
+            : (Vector2)transform.up;
+
+    void UpdateDirectionState()
+    {
+        if (moveForce.sqrMagnitude < 0.01f)
+        {
+            IsReversing = false;
+            return;
+        }
+
+        float forwardSpeed = Vector2.Dot(moveForce, transform.up);
+
+        IsReversing = forwardSpeed < -0.1f;
+    }
 }

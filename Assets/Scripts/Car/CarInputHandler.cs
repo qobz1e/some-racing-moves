@@ -12,6 +12,10 @@ public class CarInputHandler : MonoBehaviour
         inputVector.x = Input.GetAxis("Horizontal");
         inputVector.y = Input.GetAxis("Vertical");
 
+        bool nitro =
+            Input.GetKey(KeyCode.LeftShift);
+
         _car.SetInputVector(inputVector);
+        _car.SetNitroInput(nitro);
     }
 }
