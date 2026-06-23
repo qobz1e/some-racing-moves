@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class MenuController : MonoBehaviour
 {
-    public string gameScene = "GameScene";
+    public string gameScene = "TracksMenu";
 
     public void Play()
     {

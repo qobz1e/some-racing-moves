@@ -25,7 +25,7 @@ public class CarAIHandler : MonoBehaviour
         FollowWaypoints();
 
         inputVector.x = TurnTowardTarget();
-        inputVector.y = ApplyThrottleOrBrake();
+        inputVector.y = ApplyThrottleOrBrake(inputVector.x);
 
         _car.SetInputVector(inputVector);
     }
@@ -41,17 +41,8 @@ public class CarAIHandler : MonoBehaviour
         {
             targetPosition = currentWaypoint.transform.position;
 
-            float distanceToWaypoint =
-                Vector2.Distance(
-                    transform.position,
-                    currentWaypoint.transform.position);
-
-            if (distanceToWaypoint <= currentWaypoint.minDistanceToReachWaypoint)
-            {
-                currentWaypoint =
-                    currentWaypoint.nextWaypointNode[
-                        Random.Range(0, currentWaypoint.nextWaypointNode.Length)];
-            }
+            currentWaypoint = currentWaypoint.nextWaypointNode
+                [Random.Range(0, currentWaypoint.nextWaypointNode.Length)];
         }
     }
 
@@ -68,107 +59,20 @@ public class CarAIHandler : MonoBehaviour
             (targetPosition - transform.position).normalized;
 
         float angleToTarget =
-            -Vector2.SignedAngle(
-                _car.VelocityDirection,
-                vectorToTarget);
+            -Vector2.SignedAngle(transform.up, vectorToTarget);
 
-        float driftBias = 0f;
+        float steerAmount = angleToTarget / 45.0f;
 
-        if (currentWaypoint != null &&
-            currentWaypoint.nextWaypointNode.Length > 0)
-        {
-            WaypointNode next =
-                currentWaypoint.nextWaypointNode[0];
-
-            Vector2 currentDir =
-                (currentWaypoint.transform.position -
-                 transform.position).normalized;
-
-            Vector2 nextDir =
-                (next.transform.position -
-                 currentWaypoint.transform.position).normalized;
-
-            float cornerAngle =
-                Vector2.SignedAngle(
-                    currentDir,
-                    nextDir);
-
-            float distance =
-                Vector2.Distance(
-                    transform.position,
-                    currentWaypoint.transform.position);
-
-            float anticipation =
-                Mathf.InverseLerp(20f, 0f, distance);
-
-            driftBias =
-                cornerAngle *
-                -0.2f *
-                anticipation;
-        }
-
-        float desiredAngle =
-            angleToTarget + driftBias;
-
-        float steerAmount =
-            Mathf.Clamp(
-                desiredAngle / 45f,
-                -1f,
-                1f);
+        steerAmount = Mathf.Clamp(steerAmount, -1.0f, 1.0f);
 
         return steerAmount;
     }
 
-    float ApplyThrottleOrBrake()
+    float ApplyThrottleOrBrake(float inputX)
     {
-        return GetCornerThrottle();
-    }
+        if (_car.CurrentSpeed > _car.MaxSpeed)
+            return 0;
 
-    float GetCornerThrottle()
-    {
-        if (currentWaypoint == null)
-            return 1f;
-
-        if (currentWaypoint.nextWaypointNode.Length == 0)
-            return 1f;
-
-        WaypointNode next = currentWaypoint.nextWaypointNode[0];
-
-        if (next.nextWaypointNode.Length == 0)
-            return 1f;
-
-        WaypointNode nextNext = next.nextWaypointNode[0];
-
-        Vector2 dir1 =
-            (next.transform.position -
-             currentWaypoint.transform.position).normalized;
-
-        Vector2 dir2 =
-            (nextNext.transform.position -
-             next.transform.position).normalized;
-
-        float dot = Vector2.Dot(dir1, dir2);
-
-        float cornerFactor =
-            Mathf.InverseLerp(-1f, 1f, dot);
-
-        float distance =
-            Vector2.Distance(
-                transform.position,
-                currentWaypoint.transform.position);
-
-        float distanceFactor =
-            Mathf.InverseLerp(
-                30f,
-                0f,
-                distance);
-
-        float throttle =
-            Mathf.Lerp(
-                1f,
-                Mathf.Lerp(0.2f, 1f, cornerFactor),
-                distanceFactor);
-
-        return throttle;
-    }
+        return 1.05f - Mathf.Abs(inputX) / 1.0f;
+    }  
 }
