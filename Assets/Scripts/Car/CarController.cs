@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class CarController : MonoBehaviour
 {
+    public System.Action OnStartedMoving;
+
     [SerializeField] private UpgradeManager upgradeManager;
     [SerializeField] private Rigidbody2D rb;
 
@@ -64,6 +66,8 @@ public class CarController : MonoBehaviour
     public bool checkpointPassed { get; private set; }
     public System.Action OnLapCompleted;
 
+    public bool HasFinished { get; private set; }
+
     // slowing down off the road
     private int roadContacts = 0;
     private bool isOnRoad;
@@ -72,8 +76,16 @@ public class CarController : MonoBehaviour
     private float steeringLoss = 0f;
     private float tractionMultiplier = 1f;
 
+    private bool movementStarted;
+
     void Update()
     {
+        if (HasFinished)
+        {
+            accelerationInput = 0f;
+            steerInput = 0f;
+        }
+
         if (IsUsingNitro)
         {
             ActivateNitro();
@@ -110,6 +122,12 @@ public class CarController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (HasFinished)
+        {
+            accelerationInput = 0f;
+            steerInput = 0f;
+        }
+
         HandleAcceleration();
 
         UpdateDirectionState();
@@ -123,6 +141,12 @@ public class CarController : MonoBehaviour
         }
 
         Move();
+
+        if (!movementStarted && CurrentSpeed > 0.1f)
+        {
+            movementStarted = true;
+            OnStartedMoving?.Invoke();
+        }
 
         impactControlLoss = Mathf.MoveTowards(
             impactControlLoss,
@@ -379,8 +403,19 @@ public class CarController : MonoBehaviour
 
     public void CompleteLap()
     {
+        if (HasFinished)
+            return;
+
         LapCount++;
+
         OnLapCompleted?.Invoke();
+
+        if (LapCount >= RaceManager.Instance.LapsToFinish)
+        {
+            HasFinished = true;
+
+            RaceManager.Instance.FinishRace(this);
+        }
     }
 
     public void SetCheckpointPassed(bool value)

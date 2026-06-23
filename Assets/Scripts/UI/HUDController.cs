@@ -6,6 +6,7 @@ public class HUDController : MonoBehaviour
 {
     [SerializeField] private CarController _car;
     [SerializeField] private EconomyManager _eco;
+    [SerializeField] private RaceManager raceManager;
 
     [Header("Text Labels (TMPro)")]
     public TMP_Text txtCoins;
@@ -13,6 +14,9 @@ public class HUDController : MonoBehaviour
     public TMP_Text txtSpeed;
     public TMP_Text txtHint;
     public TMP_Text txtCoinPopup;
+
+    [Header("Race")]
+    public TMP_Text txtRaceTime;
 
     [Header("Speed bar")]
     public Slider speedBar;
@@ -26,8 +30,9 @@ public class HUDController : MonoBehaviour
 
     // ── Private refs ──────────────────────────────────────────────────────────
     private float _displayedNitroValue = 1f;
-    private float          _popupTimer;
-    private bool           _hintShown = true;
+    private float _popupTimer;
+    private bool  _hintShown = true;
+    private float raceTime;
 
     private void Start()
     {
@@ -55,6 +60,12 @@ public class HUDController : MonoBehaviour
     private void Update()
     {
         if (_car == null) return;
+
+        if (raceManager && txtRaceTime)
+        {
+            txtRaceTime.text =
+                FormatTime(raceManager.CurrentRaceTime);
+        }
 
         // Speed
         float ratio = _car.MaxSpeed > 0 ? _car.CurrentSpeed / _car.MaxSpeed : 0f;
@@ -150,6 +161,23 @@ public class HUDController : MonoBehaviour
 
         txtCoinPopup.gameObject.SetActive(true);
         _popupTimer = popupDuration;
+    }
+
+    string FormatTime(float t)
+    {
+        int minutes =
+            Mathf.FloorToInt(t / 60f);
+
+        int seconds =
+            Mathf.FloorToInt(t % 60f);
+
+        int milliseconds =
+            Mathf.FloorToInt(
+                (t * 1000f) % 1000f
+            );
+
+        return
+            $"{minutes:00}:{seconds:00}.{milliseconds:000}";
     }
 }
 

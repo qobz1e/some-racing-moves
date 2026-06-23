@@ -24,7 +24,7 @@ public class TrackButtonUI : MonoBehaviour
 
         float bestTime =
             PlayerPrefs.GetFloat(
-                $"BestTime_{data.sceneName}",
+                $"BestRaceTime_{data.sceneName}",
                 -1f);
 
         if (bestTime < 0)
@@ -72,11 +72,20 @@ public class TrackButtonUI : MonoBehaviour
         }
     }
 
-    string FormatTime(float time)
+    string FormatTime(float t)
     {
-        int minutes = (int)(time / 60);
-        float seconds = time % 60;
+        int minutes =
+            Mathf.FloorToInt(t / 60f);
 
-        return $"{minutes:00}:{seconds:00.000}";
+        int seconds =
+            Mathf.FloorToInt(t % 60f);
+
+        int milliseconds =
+            Mathf.FloorToInt(
+                (t * 1000f) % 1000f
+            );
+
+        return
+            $"{minutes:00}:{seconds:00}.{milliseconds:000}";
     }
 }
