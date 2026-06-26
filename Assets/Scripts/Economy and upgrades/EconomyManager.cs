@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EconomyManager : MonoBehaviour
 {
-    [SerializeField] private UpgradeManager upgradeManager;
+    [SerializeField] private CarController playerCar;
 
     [Header("Rewards")]
     public int coinsPerLap = 100;
@@ -13,17 +13,14 @@ public class EconomyManager : MonoBehaviour
     public int  Coins { get; private set; }
     public System.Action<int, int> OnCoinsChanged;
 
-    private CarController _car;
-
     private float passiveIncomeTimer;
 
     private void Awake()
     {
-        _car = FindAnyObjectByType<CarController>();
-        if (_car != null)
-            _car.OnLapCompleted += AwardLap;
-        else
-            Debug.LogWarning("[EconomyManager] CarController not found.");
+        if (playerCar != null)
+            playerCar.OnLapCompleted += AwardLap;
+
+        Coins = PlayerProfile.Coins;
     }
 
     void Update()
@@ -34,24 +31,24 @@ public class EconomyManager : MonoBehaviour
         {
             passiveIncomeTimer = 0f;
 
-            if (upgradeManager.passiveIncomeAmount > 0)
+            if (PlayerProfile.PassiveIncomeAmount > 0)
             {
-                AddCoins(upgradeManager.passiveIncomeAmount);
+                AddCoins(PlayerProfile.PassiveIncomeAmount);
             }
         }
     }
 
     private void OnDestroy()
     {
-        if (_car != null)
-            _car.OnLapCompleted -= AwardLap;
+        if (playerCar != null)
+            playerCar.OnLapCompleted -= AwardLap;
     }
 
     private void AwardLap()
     {
         int reward = Mathf.RoundToInt(
-            coinsPerLap * upgradeManager.lapMoneyMultiplier
-        ); 
+            coinsPerLap * PlayerProfile.LapMoneyMultiplier
+        );
 
         AddCoins(reward);
         Debug.Log($"[Economy] Lap! +{reward} → total {Coins}");
@@ -60,7 +57,12 @@ public class EconomyManager : MonoBehaviour
     public void AddCoins(int amount)
     {
         Coins += amount;
+
         OnCoinsChanged?.Invoke(Coins, amount);
+
+        PlayerProfile.Coins = Coins;
+
+        SaveSystem.Save();
 
         if (coinPopupPrefab != null)
         {

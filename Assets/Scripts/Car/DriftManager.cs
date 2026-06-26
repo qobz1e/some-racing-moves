@@ -6,7 +6,6 @@ public class DriftManager : MonoBehaviour
 {
     [SerializeField] private CarController car;
     [SerializeField] private EconomyManager economy;
-    [SerializeField] private UpgradeManager upgrades;
 
     [Header("UI")]
     [SerializeField] private TMP_Text driftText;
@@ -54,8 +53,8 @@ public class DriftManager : MonoBehaviour
                 int reward =
                     Mathf.RoundToInt(
                         baseReward *
-                        (1f + Mathf.Floor(combo/5f)) *
-                        upgrades.driftMoneyMultiplier
+                        (1f + Mathf.Floor(combo / 5f)) *
+                        PlayerProfile.DriftMoneyMultiplier
                     );
 
                 economy.AddCoins(reward);

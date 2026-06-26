@@ -43,7 +43,7 @@ public class HUDController : MonoBehaviour
             _car.OnLapCompleted += OnLapCompleted;
 
         // Initial state
-        SetCoins(0);
+        SetCoins(PlayerProfile.Coins);
         SetLap(0);
         if (txtHint)      txtHint.text = "W TO ACCELERATE\nA/D TO STEER\nLEFT SHIFT TO USE NITRO";
         if (txtCoinPopup) txtCoinPopup.gameObject.SetActive(false);

@@ -41,21 +41,33 @@ public class PauseManager : MonoBehaviour
             pauseUI.SetActive(false);
     }
 
-    public void ReturnToMenu()
+    public void BackToTracksMenu()
     {
         if (isExiting) return;
 
         isExiting = true;
-        StartCoroutine(LoadMenu());
+        StartCoroutine(LoadTracksMenu());
     }
 
-    System.Collections.IEnumerator LoadMenu()
+    public void BackToMainMenu()
     {
-        //Time.timeScale = 1f;
-        //if (pauseUI) pauseUI.SetActive(false);
+        if (isExiting) return;
 
+        isExiting = true;
+        StartCoroutine(LoadMainMenu());
+    }
+
+    System.Collections.IEnumerator LoadMainMenu()
+    {
         yield return new WaitForSecondsRealtime(returnDelay);
 
         SceneManager.LoadScene("MainMenu");
+    }
+
+    System.Collections.IEnumerator LoadTracksMenu()
+    {
+        yield return new WaitForSecondsRealtime(returnDelay);
+
+        SceneManager.LoadScene("TracksMenu");
     }
 }

@@ -5,8 +5,8 @@ public class CarController : MonoBehaviour
 {
     public System.Action OnStartedMoving;
 
-    [SerializeField] private UpgradeManager upgradeManager;
     [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private bool isPlayer;
 
     [Header("Movement")]
     [SerializeField] public float acceleration = 10.5f;
@@ -20,10 +20,19 @@ public class CarController : MonoBehaviour
 
     float accelerationInput;
     private Vector2 moveForce;
-    float Accel => acceleration * upgradeManager.speedMultiplier;
-    float dragReduce => upgradeManager.throttleDecrease;
     public float CurrentSpeed => moveForce.magnitude;
-    public float MaxSpeed => maxSpeed * upgradeManager.speedMultiplier;
+
+    float SpeedMultiplier => isPlayer
+        ? 1f + PlayerProfile.SpeedLevel * 0.05f
+        : 1f;
+
+    float DragReduce => isPlayer
+        ? PlayerProfile.AerodynamicsLevel * 0.02f
+        : 0.2f;
+
+    public float MaxSpeed => maxSpeed * SpeedMultiplier;
+    float Accel => acceleration * SpeedMultiplier;
+    float dragReduce => DragReduce;
 
     public bool IsReversing { get; private set; }
 
@@ -48,6 +57,12 @@ public class CarController : MonoBehaviour
     [SerializeField] private float throttleDrag = 0.5f;
     [SerializeField] private float offRoadDrag = 0.8f;
 
+    float NitroCapacity => isPlayer
+        ? (PlayerProfile.NitroLevel > 0
+            ? 0.5f + PlayerProfile.NitroLevel / 2f
+            : 0f)
+        : 0f;
+
     public float NitroAmount { get; private set; }
     private float nitroCooldownTimer;
 
@@ -57,8 +72,8 @@ public class CarController : MonoBehaviour
         nitroInput &&
         NitroAmount > 0f;
 
-    public float MaxNitro => upgradeManager.nitroCapacity;
-    public bool HasNitro => upgradeManager.nitro.level > 0;
+    public float MaxNitro => NitroCapacity;
+    public bool HasNitro => NitroCapacity > 0;
     public float NitroCooldown => nitroCooldownTimer;
 
     // lap completing
@@ -111,7 +126,7 @@ public class CarController : MonoBehaviour
             {
                 NitroAmount = Mathf.Min(
                     NitroAmount + Time.deltaTime * 0.5f,
-                    upgradeManager.nitroCapacity
+                    NitroCapacity
                 );
             }
         }

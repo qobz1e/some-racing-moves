@@ -38,15 +38,12 @@ public class UpgradeManager : MonoBehaviour
 
     private void Awake()
     {
-        speed.level = 0;
-        lapMoney.level = 0;
-        driftMoney.level = 0;
-        passiveIncome.level = 0;
-        nitro.level = 0;
-        aerodynamics.level = 0;
-
-        if (economy == null)
-            economy = FindAnyObjectByType<EconomyManager>();
+        speed.level = PlayerProfile.SpeedLevel;
+        lapMoney.level = PlayerProfile.LapMoneyLevel;
+        driftMoney.level = PlayerProfile.DriftMoneyLevel;
+        passiveIncome.level = PlayerProfile.PassiveIncomeLevel;
+        nitro.level = PlayerProfile.NitroLevel;
+        aerodynamics.level = PlayerProfile.AerodynamicsLevel;
 
         ApplyUpgrades();
     }
@@ -78,7 +75,7 @@ public class UpgradeManager : MonoBehaviour
     // BUY METHODS
     // =========================
 
-    private bool TryBuy(ref int level, int maxLevel, int cost)
+    private bool TryBuy(ref int level, int maxLevel, int cost, string saveKey)
     {
         if (level >= maxLevel)
             return false;
@@ -90,6 +87,8 @@ public class UpgradeManager : MonoBehaviour
 
         level++;
 
+        SyncProfile();
+
         ApplyUpgrades();
 
         return true;
@@ -100,7 +99,8 @@ public class UpgradeManager : MonoBehaviour
         TryBuy(
             ref speed.level,
             speed.maxLevel,
-            GetSpeedCost()
+            GetSpeedCost(),
+            "Speed"
         );
     }
 
@@ -109,7 +109,8 @@ public class UpgradeManager : MonoBehaviour
         TryBuy(
             ref lapMoney.level,
             lapMoney.maxLevel,
-            GetLapMoneyCost()
+            GetLapMoneyCost(),
+            "LapMoney"
         );
     }
 
@@ -118,7 +119,8 @@ public class UpgradeManager : MonoBehaviour
         TryBuy(
             ref driftMoney.level,
             driftMoney.maxLevel,
-            GetDriftMoneyCost()
+            GetDriftMoneyCost(),
+            "DriftMoney"
         );
     }
 
@@ -127,7 +129,8 @@ public class UpgradeManager : MonoBehaviour
         TryBuy(
             ref passiveIncome.level,
             passiveIncome.maxLevel,
-            GetPassiveIncomeCost()
+            GetPassiveIncomeCost(),
+            "PassiveIncome"
         );
     }
 
@@ -136,7 +139,8 @@ public class UpgradeManager : MonoBehaviour
         TryBuy(
             ref nitro.level,
             nitro.maxLevel,
-            GetNitroCost()
+            GetNitroCost(),
+            "Nitro"
         );
     }
 
@@ -145,7 +149,8 @@ public class UpgradeManager : MonoBehaviour
         TryBuy(
             ref aerodynamics.level,
             aerodynamics.maxLevel,
-            GetAerodynamicsCost()
+            GetAerodynamicsCost(),
+            "Aerodynamics"
         );
     }
 
@@ -194,5 +199,17 @@ public class UpgradeManager : MonoBehaviour
             debugText += $" | Drag reduced by {aerodynamics.level * 4}%";
 
         Debug.Log(debugText);
+    }
+
+    void SyncProfile()
+    {
+        PlayerProfile.SpeedLevel = speed.level;
+        PlayerProfile.LapMoneyLevel = lapMoney.level;
+        PlayerProfile.DriftMoneyLevel = driftMoney.level;
+        PlayerProfile.PassiveIncomeLevel = passiveIncome.level;
+        PlayerProfile.NitroLevel = nitro.level;
+        PlayerProfile.AerodynamicsLevel = aerodynamics.level;
+
+        SaveSystem.Save();
     }
 }
