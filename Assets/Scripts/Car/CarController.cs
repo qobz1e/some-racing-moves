@@ -84,16 +84,21 @@ public class CarController : MonoBehaviour
     public bool HasFinished { get; private set; }
 
     // slowing down off the road
-    private int roadContacts = 0;
     private bool isOnRoad;
-
+        
     private float impactControlLoss = 0f;
     private float steeringLoss = 0f;
     private float tractionMultiplier = 1f;
 
     private bool movementStarted;
 
-    void Update()
+    void Start()
+    {
+        Debug.Log($"timeScale = {Time.timeScale}");
+        Debug.Log($"fixedDeltaTime = {Time.fixedDeltaTime}");
+    }
+
+    void FixedUpdate()
     {
         if (HasFinished)
         {
@@ -104,7 +109,7 @@ public class CarController : MonoBehaviour
         if (IsUsingNitro)
         {
             ActivateNitro();
-            NitroAmount -= Time.deltaTime;   
+            NitroAmount -= Time.fixedDeltaTime;
 
             if (NitroAmount <= 0f)
             {
@@ -120,30 +125,22 @@ public class CarController : MonoBehaviour
         {
             if (nitroCooldownTimer > 0f)
             {
-                nitroCooldownTimer -= Time.deltaTime;
+                nitroCooldownTimer -= Time.fixedDeltaTime;
             }
             else
             {
                 NitroAmount = Mathf.Min(
-                    NitroAmount + Time.deltaTime * 0.5f,
+                    NitroAmount + Time.fixedDeltaTime * 0.5f,
                     NitroCapacity
                 );
             }
         }
 
-        HandleDrag(); 
-        HandleDriftPhysics();
-    }
-
-    void FixedUpdate()
-    {
-        if (HasFinished)
-        {
-            accelerationInput = 0f;
-            steerInput = 0f;
-        }
-
         HandleAcceleration();
+
+        HandleDrag();
+
+        HandleDriftPhysics();
 
         UpdateDirectionState();
 
@@ -163,23 +160,23 @@ public class CarController : MonoBehaviour
             OnStartedMoving?.Invoke();
         }
 
-        impactControlLoss = Mathf.MoveTowards(
-            impactControlLoss,
-            0f,
-            Time.deltaTime * 0.2f
-        );
+        //impactControlLoss = Mathf.MoveTowards(
+        //    impactControlLoss,
+        //    0f,
+        //    Time.deltaTime * 0.2f
+        //);
 
-        steeringLoss = Mathf.MoveTowards(
-            steeringLoss,
-            0f,
-            Time.deltaTime * 0.2f
-        );
+        //steeringLoss = Mathf.MoveTowards(
+        //    steeringLoss,
+        //    0f,
+        //    Time.deltaTime * 0.2f
+        //);
 
-        tractionMultiplier = Mathf.MoveTowards(
-            tractionMultiplier,
-            1f,
-            Time.deltaTime * 0.2f
-        );
+        //tractionMultiplier = Mathf.MoveTowards(
+        //    tractionMultiplier,
+        //    1f,
+        //    Time.deltaTime * 0.2f
+        //);
     }
 
     // ─────────────────────────────
@@ -195,19 +192,19 @@ public class CarController : MonoBehaviour
             moveForce += (Vector2)transform.up *
                          accelerationInput *
                          accel *
-                         Time.deltaTime;
+                         Time.fixedDeltaTime;
         }
         else if (accelerationInput < 0f)
         {
             moveForce += (Vector2)transform.up *
                          accelerationInput *
                          reverseAcceleration *
-                         Time.deltaTime;
+                         Time.fixedDeltaTime;
         }
 
-        if (!IsOnRoad())
+        if (!isOnRoad)
         {
-            moveForce *= 1f - offRoadDrag * Time.deltaTime;
+            moveForce *= 1f - offRoadDrag * Time.fixedDeltaTime;
         }
 
         if (IsReversing)
@@ -225,7 +222,7 @@ public class CarController : MonoBehaviour
                         Mathf.MoveTowards(
                             speed,
                             currentLimit,
-                            6f * Time.deltaTime);
+                            6f * Time.fixedDeltaTime);
         }
 
         if (speed < -reverseSpeed)
@@ -236,10 +233,9 @@ public class CarController : MonoBehaviour
         }
     }
 
-
     void Move()
     {
-        rb.MovePosition(rb.position + moveForce * Time.deltaTime);
+        rb.MovePosition(rb.position + moveForce * Time.fixedDeltaTime);
     }
 
     void HandleSteering()
@@ -266,7 +262,7 @@ public class CarController : MonoBehaviour
             direction *
             moveForce.magnitude *
             steerAngle *
-            Time.deltaTime
+            Time.fixedDeltaTime
         );
     }
 
@@ -279,7 +275,7 @@ public class CarController : MonoBehaviour
                 ? throttleDrag - dragReduce
                 : coastDrag;
 
-        float decay = Mathf.Clamp01(currentDrag * Time.deltaTime);
+        float decay = Mathf.Clamp01(currentDrag * Time.fixedDeltaTime);
 
         moveForce = Vector2.Lerp(
             moveForce,
@@ -312,7 +308,7 @@ public class CarController : MonoBehaviour
         if (driftingNow)
             driftGraceTimer = 0.3f;
         else
-            driftGraceTimer -= Time.deltaTime;
+            driftGraceTimer -= Time.fixedDeltaTime;
 
         IsDrifting = driftGraceTimer > 0f;
 
@@ -320,7 +316,7 @@ public class CarController : MonoBehaviour
             Vector2.Lerp(
                 moveForce,
                 forward * moveForce.magnitude,
-                traction * Time.deltaTime
+                traction * Time.fixedDeltaTime
             );
     }
 
@@ -328,7 +324,7 @@ public class CarController : MonoBehaviour
 
     private void ActivateNitro()
     {
-        moveForce += (Vector2)transform.up * nitroBoostForce * Time.deltaTime;
+        moveForce += (Vector2)transform.up * nitroBoostForce * Time.fixedDeltaTime;
     }
 
     // ─────────────────────────────
@@ -400,18 +396,13 @@ public class CarController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D col)
     {
         if (col.CompareTag("Road"))
-            roadContacts++;
+            isOnRoad = true;
     }
 
     private void OnTriggerExit2D(Collider2D col)
     {
         if (col.CompareTag("Road"))
-            roadContacts--;
-    }
-
-    private bool IsOnRoad()
-    {
-        return roadContacts > 0;
+            isOnRoad = false;
     }
 
     // ─────────────────────────────

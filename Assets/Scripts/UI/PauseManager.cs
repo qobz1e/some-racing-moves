@@ -62,6 +62,9 @@ public class PauseManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(returnDelay);
 
         SceneManager.LoadScene("MainMenu");
+
+        isPaused = false;
+        Time.timeScale = 1f;
     }
 
     System.Collections.IEnumerator LoadTracksMenu()
@@ -69,5 +72,8 @@ public class PauseManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(returnDelay);
 
         SceneManager.LoadScene("TracksMenu");
+
+        isPaused = false;
+        Time.timeScale = 1f;
     }
 }

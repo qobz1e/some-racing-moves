@@ -170,29 +170,40 @@ public class CarAIHandler : MonoBehaviour
         dotProduct = Mathf.Clamp(dotProduct, 0f, maxDistance);
 
         return lineStartPosition + lineHeadingVector * dotProduct;
-    } 
+    }
 
     bool IsCarInFrontOfAICar(out Vector3 position, out Vector3 otherCarRightVector)
     {
-        polygonCollider2D.enabled = false;
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(
+            transform.position + transform.up * 0.5f,
+            0.3f,
+            transform.up,
+            6f,
+            1 << LayerMask.NameToLayer("Car"));
 
-        RaycastHit2D raycastHit2D = Physics2D.CircleCast(transform.position + transform.up * 0.5f, 0.3f, transform.up, 6f, 1 << LayerMask.NameToLayer("Car"));
-
-        polygonCollider2D.enabled = true;
-
-        if (raycastHit2D.collider != null)
+        foreach (RaycastHit2D hit in hits)
         {
-            Debug.DrawRay(transform.position, transform.up * 3, Color.red);
-        
-            position = raycastHit2D.collider.transform.position;
-            otherCarRightVector = raycastHit2D.collider.transform.right;
+            if (hit.collider == null)
+                continue;
+
+            if (hit.collider.gameObject == gameObject)
+                continue;
+
+            Debug.DrawRay(
+                transform.position,
+                transform.up * 3,
+                Color.red);
+
+            position = hit.collider.transform.position;
+            otherCarRightVector = hit.collider.transform.right;
 
             return true;
         }
-        else
-        {
-            Debug.DrawRay(transform.position, transform.up * 3, Color.black);
-        }
+
+        Debug.DrawRay(
+            transform.position,
+            transform.up * 3,
+            Color.black);
 
         position = Vector3.zero;
         otherCarRightVector = Vector3.zero;
