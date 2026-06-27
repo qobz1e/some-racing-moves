@@ -39,4 +39,14 @@ public static class SaveSystem
         PlayerProfile.AerodynamicsLevel =
             PlayerPrefs.GetInt("AerodynamicsLevel", 0);
     }
+
+    public static void DeleteRaceResults()
+    {
+        foreach (TrackDataMenu track in Resources.LoadAll<TrackDataMenu>("Tracks"))
+        {
+            PlayerPrefs.DeleteKey($"BestRaceTime_{track.sceneName}");
+        }
+
+        PlayerPrefs.Save();
+    }
 }

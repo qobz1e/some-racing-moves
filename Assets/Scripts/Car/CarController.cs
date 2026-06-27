@@ -92,12 +92,6 @@ public class CarController : MonoBehaviour
 
     private bool movementStarted;
 
-    void Start()
-    {
-        Debug.Log($"timeScale = {Time.timeScale}");
-        Debug.Log($"fixedDeltaTime = {Time.fixedDeltaTime}");
-    }
-
     void FixedUpdate()
     {
         if (HasFinished)

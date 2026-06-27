@@ -31,6 +31,7 @@ public static class PlayerProfile
         NitroLevel = 0;
         AerodynamicsLevel = 0;
 
+        SaveSystem.DeleteRaceResults();
         SaveSystem.Save();
     }
 }

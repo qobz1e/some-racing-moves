@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[System.Serializable]
-public class TrackDataMenu
+[CreateAssetMenu(menuName = "Tracks/Track Data")]
+public class TrackDataMenu : ScriptableObject
 {
     public string trackName;
     public Sprite previewSprite;
