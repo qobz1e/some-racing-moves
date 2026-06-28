@@ -6,6 +6,8 @@ public class UpgradeHUD : MonoBehaviour
 {
     [SerializeField] private EconomyManager economy;
     [SerializeField] private UpgradeManager upgradeManager;
+    [SerializeField] private GarageCoinsUI coinsUIGarage;
+    [SerializeField] private GarageCoinsUI coinsUITracksMenu;
 
     [System.Serializable]
     public class UpgradeUI
@@ -105,6 +107,9 @@ public class UpgradeHUD : MonoBehaviour
             aerodynamicsCost,
             economy.Coins >= aerodynamicsCost
         );
+
+        coinsUIGarage.Refresh();
+        coinsUITracksMenu.Refresh();
     }
 
     private void UpdateButton(

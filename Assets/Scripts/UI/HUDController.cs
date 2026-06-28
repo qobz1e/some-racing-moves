@@ -8,15 +8,15 @@ public class HUDController : MonoBehaviour
     [SerializeField] private EconomyManager _eco;
     [SerializeField] private RaceManager raceManager;
 
-    [Header("Text Labels (TMPro)")]
-    public TMP_Text txtCoins;
-    public TMP_Text txtLap;
+    [Header("Base labels")]
+    public TMP_Text txtCoins;  
     public TMP_Text txtSpeed;
     public TMP_Text txtHint;
-    public TMP_Text txtCoinPopup;
 
     [Header("Race")]
     public TMP_Text txtRaceTime;
+    public TMP_Text txtPlace;
+    public TMP_Text txtLap;
 
     [Header("Speed bar")]
     public Slider speedBar;
@@ -26,6 +26,7 @@ public class HUDController : MonoBehaviour
     public Slider nitroBar;
 
     [Header("Coin popup")]
+    public TMP_Text txtCoinPopup;
     public float popupDuration = 1.2f;
 
     // ── Private refs ──────────────────────────────────────────────────────────
@@ -61,11 +62,14 @@ public class HUDController : MonoBehaviour
     {
         if (_car == null) return;
 
+        // Race
         if (raceManager && txtRaceTime)
         {
             txtRaceTime.text =
                 FormatTime(raceManager.CurrentRaceTime);
         }
+        
+        UpdatePlace();
 
         // Speed
         float ratio = _car.MaxSpeed > 0 ? _car.CurrentSpeed / _car.MaxSpeed : 0f;
@@ -147,7 +151,15 @@ public class HUDController : MonoBehaviour
 
     private void SetLap(int lap)
     {
-        if (txtLap) txtLap.text = $"Lap: {lap}";
+        int maxLaps = RaceManager.Instance.LapsToFinish;
+
+        if (txtLap) txtLap.text = $"Lap: {Mathf.Min(lap + 1, maxLaps)} / {maxLaps}";
+    }
+
+    private void UpdatePlace()
+    {
+        if (txtPlace) txtPlace.text = 
+                $"Place: {raceManager.GetPlayerPlace()} / {raceManager.CarCount}";
     }
 
     private void ShowCoinPopup(int delta)
@@ -177,7 +189,7 @@ public class HUDController : MonoBehaviour
             );
 
         return
-            $"{minutes:00}:{seconds:00}.{milliseconds:000}";
+            $"Time: {minutes:00}:{seconds:00}.{milliseconds:000}";
     }
 }
 

@@ -81,16 +81,31 @@ public class CarController : MonoBehaviour
     public bool checkpointPassed { get; private set; }
     public System.Action OnLapCompleted;
 
+    public WaypointNode currentWaypoint;
+    public float distanceToNextWaypoint;
+    public int waypointIndex { get; private set; }
+
+    public float Progress { get; private set; }
+
     public bool HasFinished { get; private set; }
+
+    private bool canCountWaypoint = true;
 
     // slowing down off the road
     private bool isOnRoad;
-        
-    private float impactControlLoss = 0f;
-    private float steeringLoss = 0f;
-    private float tractionMultiplier = 1f;
 
     private bool movementStarted;
+
+    void Start()
+    {
+        RaceManager.Instance.RegisterCar(this);
+    }
+
+    void OnDestroy()
+    {
+        if (RaceManager.Instance != null)
+            RaceManager.Instance.UnregisterCar(this);
+    }
 
     void FixedUpdate()
     {
@@ -153,24 +168,6 @@ public class CarController : MonoBehaviour
             movementStarted = true;
             OnStartedMoving?.Invoke();
         }
-
-        //impactControlLoss = Mathf.MoveTowards(
-        //    impactControlLoss,
-        //    0f,
-        //    Time.deltaTime * 0.2f
-        //);
-
-        //steeringLoss = Mathf.MoveTowards(
-        //    steeringLoss,
-        //    0f,
-        //    Time.deltaTime * 0.2f
-        //);
-
-        //tractionMultiplier = Mathf.MoveTowards(
-        //    tractionMultiplier,
-        //    1f,
-        //    Time.deltaTime * 0.2f
-        //);
     }
 
     // ─────────────────────────────
@@ -241,8 +238,6 @@ public class CarController : MonoBehaviour
         if (Mathf.Abs(forwardDot) < 0.05f)
             direction = 1f;
 
-        float steerPower = 1f - steeringLoss;
-
         float reverseMultiplier =
             direction < 0f
                 ? 0.6f
@@ -251,7 +246,6 @@ public class CarController : MonoBehaviour
         transform.Rotate(
             Vector3.forward,
             steerInput *
-            steerPower *
             reverseMultiplier *
             direction *
             moveForce.magnitude *
@@ -343,22 +337,6 @@ public class CarController : MonoBehaviour
 
         impactStrength = Mathf.Abs(impactStrength);
 
-        impactControlLoss =
-            Mathf.Clamp01(
-                impactStrength * 0.15f);
-
-        steeringLoss =
-            Mathf.Clamp01(
-                impactStrength * 0.12f);
-
-        tractionMultiplier = 0.15f;
-
-        impactControlLoss = 
-            Mathf.Clamp(
-                impactControlLoss + 
-                impactStrength * 0.2f,
-                0f, 1f);
-
         float impulseStrength = impactStrength * 1.5f;
 
         Vector2 impulse = normal * impulseStrength;
@@ -407,20 +385,82 @@ public class CarController : MonoBehaviour
             return;
 
         LapCount++;
-
+        
         OnLapCompleted?.Invoke();
+        RaceManager.Instance.OnLapCompleted(this);
+
+        currentWaypoint = null;
 
         if (LapCount >= RaceManager.Instance.LapsToFinish)
         {
             HasFinished = true;
-
             RaceManager.Instance.FinishRace(this);
         }
+    }
+
+    public void UpdateWaypointProgress(WaypointNode[] allWaypoints)
+    {
+        if (currentWaypoint == null)
+        {
+            currentWaypoint = allWaypoints[0];
+            waypointIndex = 0;
+        }
+
+        distanceToNextWaypoint = 
+            Vector3.Distance(
+                transform.position,
+                currentWaypoint.transform.position
+            );
+
+        if (distanceToNextWaypoint <= currentWaypoint.minDistanceToReachWaypoint && canCountWaypoint)
+        {
+            canCountWaypoint = false;
+
+            if (currentWaypoint.nextWaypointNode != null &&
+                currentWaypoint.nextWaypointNode.Length > 0)
+            {
+                currentWaypoint = currentWaypoint.nextWaypointNode[0];
+                waypointIndex++;
+            }
+        }
+
+        if (isPlayer)
+        {
+            for (int i = 1; i <= 3; i++)
+            {
+                int index = waypointIndex + i;
+
+                if (index >= allWaypoints.Length)
+                    break;
+
+                if (Vector3.Distance(transform.position,
+                    allWaypoints[index].transform.position)
+                    < allWaypoints[index].minDistanceToReachWaypoint)
+                {
+                    waypointIndex = index;
+                    currentWaypoint =
+                        allWaypoints[index].nextWaypointNode[0];
+
+                    break;
+                }
+            }
+        }
+
+        if (distanceToNextWaypoint > currentWaypoint.minDistanceToReachWaypoint + 1f)
+        {
+            canCountWaypoint = true;
+        }
+
+        Progress =
+            LapCount * 10000f +
+            waypointIndex * 100f -
+            Mathf.Clamp(distanceToNextWaypoint, 0f, 50f);
     }
 
     public void SetCheckpointPassed(bool value)
     {
         checkpointPassed = value;
+        Debug.Log(checkpointPassed);
     }
 
     // ─────────────────────────────

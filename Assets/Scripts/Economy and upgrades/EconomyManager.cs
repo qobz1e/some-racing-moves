@@ -15,7 +15,7 @@ public class EconomyManager : MonoBehaviour
 
     private float passiveIncomeTimer;
 
-    private void Awake()
+    private void Start()
     {
         if (playerCar != null)
             playerCar.OnLapCompleted += AwardLap;
