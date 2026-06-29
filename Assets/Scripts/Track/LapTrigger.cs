@@ -5,7 +5,7 @@ public class LapTrigger : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         CarController car =
-            other.GetComponent<CarController>();
+            other.transform.root.GetComponent<CarController>();
 
         if (car == null)
             return;

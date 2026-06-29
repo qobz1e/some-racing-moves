@@ -106,7 +106,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Cars_lvl1_part1_blue
+      name: Cars_lvl1_blue
       rect:
         serializedVersion: 2
         x: 50
@@ -185,8 +185,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      Cars_lvl1_blue: 1280478300385959706
       Cars_lvl1_lime: 970055333105417166
-      Cars_lvl1_part1_blue: 1280478300385959706
       Cars_lvl1_red: -186418556173460460
       l: -186418556173460460
   mipmapLimitGroupName: 

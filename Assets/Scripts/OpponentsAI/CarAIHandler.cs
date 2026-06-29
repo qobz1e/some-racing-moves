@@ -16,13 +16,16 @@ public class CarAIHandler : MonoBehaviour
     WaypointNode previousWaypoint = null;
     [SerializeField] WaypointNode[] allWaypoints;
 
-    PolygonCollider2D polygonCollider2D;
+    private CarVisual visual;
+    private PolygonCollider2D polygonCollider2D;
 
     private bool playerStarted = false;
 
     void Awake()
     {
-        polygonCollider2D = GetComponent<PolygonCollider2D>();
+        visual = GetComponentInChildren<CarVisual>();
+
+        polygonCollider2D = visual.PolygonCollider;
     }
 
     void FixedUpdate()
@@ -38,6 +41,10 @@ public class CarAIHandler : MonoBehaviour
         inputVector.y = ApplyThrottleOrBrake();
 
         _car.SetInputVector(inputVector);
+
+        Debug.Log(targetPosition);
+        Debug.Log(currentWaypoint.name);
+        Debug.Log(TurnTowardTarget());
     }
 
     void FollowWaypoints()
@@ -186,7 +193,7 @@ public class CarAIHandler : MonoBehaviour
             if (hit.collider == null)
                 continue;
 
-            if (hit.collider.gameObject == gameObject)
+            if (hit.collider.transform.root == transform.root)
                 continue;
 
             Debug.DrawRay(

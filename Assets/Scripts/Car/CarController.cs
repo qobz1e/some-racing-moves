@@ -8,19 +8,31 @@ public class CarController : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private bool isPlayer;
 
+    private CarVisual visual;
+    private CarData Data => visual.Data;
+
     [Header("Movement")]
-    [SerializeField] public float acceleration = 10.5f;
-    [SerializeField] public float maxSpeed = 6f;
-
-    [SerializeField] private float reverseAcceleration = 9f;
-    [SerializeField] private float reverseSpeed = 3f;
-
     [SerializeField] private AnimationCurve accelerationCurve =
         AnimationCurve.EaseInOut(0, 0.35f, 1, 0.3f);
 
     float accelerationInput;
     private Vector2 moveForce;
     public float CurrentSpeed => moveForce.magnitude;
+
+    float Acceleration =>
+        Data.stats.acceleration;
+
+    float MaxForwardSpeed =>
+        Data.stats.maxSpeed;
+
+    float ReverseAcceleration =>
+        Data.stats.reverseAcceleration;
+
+    float ReverseSpeed =>
+        Data.stats.reverseSpeed;
+
+    float Traction =>
+        Data.stats.traction;
 
     float SpeedMultiplier => isPlayer
         ? 1f + PlayerProfile.SpeedLevel * 0.05f
@@ -30,8 +42,8 @@ public class CarController : MonoBehaviour
         ? PlayerProfile.AerodynamicsLevel * 0.02f
         : 0.2f;
 
-    public float MaxSpeed => maxSpeed * SpeedMultiplier;
-    float Accel => acceleration * SpeedMultiplier;
+    public float MaxSpeed => MaxForwardSpeed * SpeedMultiplier;
+    float Accel => Acceleration * SpeedMultiplier;
     float dragReduce => DragReduce;
 
     public bool IsReversing { get; private set; }
@@ -39,9 +51,6 @@ public class CarController : MonoBehaviour
     [Header("Steering")]
     public float steerAngle = 30f;
     float steerInput;
-
-    [Header("Drift")]
-    public float traction = 0.5f;
 
     public bool IsDrifting { get; private set; }
     public float DriftAngle { get; private set; }
@@ -99,6 +108,11 @@ public class CarController : MonoBehaviour
     void Start()
     {
         RaceManager.Instance.RegisterCar(this);
+    }
+
+    void Awake()
+    {
+        visual = GetComponentInChildren<CarVisual>();
     }
 
     void OnDestroy()
@@ -189,7 +203,7 @@ public class CarController : MonoBehaviour
         {
             moveForce += (Vector2)transform.up *
                          accelerationInput *
-                         reverseAcceleration *
+                         ReverseAcceleration *
                          Time.fixedDeltaTime;
         }
 
@@ -216,11 +230,11 @@ public class CarController : MonoBehaviour
                             6f * Time.fixedDeltaTime);
         }
 
-        if (speed < -reverseSpeed)
+        if (speed < -ReverseSpeed)
         {
             Vector2 lateral = moveForce - (Vector2)transform.up * speed;
 
-            moveForce = lateral + (Vector2)transform.up * (-reverseSpeed);
+            moveForce = lateral + (Vector2)transform.up * (-ReverseSpeed);
         }
     }
 
@@ -304,7 +318,7 @@ public class CarController : MonoBehaviour
             Vector2.Lerp(
                 moveForce,
                 forward * moveForce.magnitude,
-                traction * Time.fixedDeltaTime
+                Traction * Time.fixedDeltaTime
             );
     }
 

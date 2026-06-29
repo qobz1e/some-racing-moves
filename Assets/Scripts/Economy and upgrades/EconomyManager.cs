@@ -10,7 +10,7 @@ public class EconomyManager : MonoBehaviour
     [SerializeField] private CoinPopup coinPopupPrefab;
     [SerializeField] private RectTransform popupParent;
 
-    public int  Coins { get; private set; }
+    public int Coins => PlayerProfile.Coins;
     public System.Action<int, int> OnCoinsChanged;
 
     private float passiveIncomeTimer;
@@ -19,8 +19,6 @@ public class EconomyManager : MonoBehaviour
     {
         if (playerCar != null)
             playerCar.OnLapCompleted += AwardLap;
-
-        Coins = PlayerProfile.Coins;
     }
 
     void Update()
@@ -56,11 +54,9 @@ public class EconomyManager : MonoBehaviour
 
     public void AddCoins(int amount)
     {
-        Coins += amount;
+        PlayerProfile.Coins += amount;
 
-        OnCoinsChanged?.Invoke(Coins, amount);
-
-        PlayerProfile.Coins = Coins;
+        OnCoinsChanged?.Invoke(PlayerProfile.Coins, amount);
 
         SaveSystem.Save();
 
