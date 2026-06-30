@@ -1,0 +1,243 @@
+fileFormatVersion: 2
+guid: df1f342009753af42b76fef618df1c97
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1673259158029414336
+    second: Cars_lvl4_part2_0
+  - first:
+      213: 1148430634240565737
+    second: Cars_lvl4_part2_1
+  - first:
+      213: -484126070739074378
+    second: Cars_lvl4_part2_2
+  - first:
+      213: 8758778671862389391
+    second: Cars_lvl4_part2_3
+  - first:
+      213: -7688306465567158949
+    second: Cars_lvl4_part2_4
+  - first:
+      213: -4372660507716897686
+    second: Cars_lvl4_part2_5
+  - first:
+      213: 1145182686197129885
+    second: Cars_lvl4_part2_6
+  - first:
+      213: -1292076299238896851
+    second: Cars_lvl4_part2_7
+  - first:
+      213: -9128413955438629664
+    second: Cars_lvl4_part2_8
+  - first:
+      213: -3361843776645172032
+    second: Cars_lvl4_part2_9
+  - first:
+      213: -7036284614752628330
+    second: Cars_lvl4_part2_10
+  - first:
+      213: -6215444424285499939
+    second: Cars_lvl4_part2_11
+  - first:
+      213: -7247403633662806637
+    second: Cars_lvl4_part2_12
+  - first:
+      213: -4872566232463119452
+    second: Cars_lvl4_part2_13
+  - first:
+      213: 2189630123712061925
+    second: Cars_lvl4_part2_14
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Cars_lvl4_black
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 283
+        width: 432
+        height: 604
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e1e513c39b00ff00800000000000000
+      internalID: 1148430634240565737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cars_lvl4_white
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 283
+        width: 440
+        height: 604
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2b0a29937f911ee0800000000000000
+      internalID: -1292076299238896851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cars_lvl4_yellow
+      rect:
+        serializedVersion: 2
+        x: 1069
+        y: 283
+        width: 436
+        height: 604
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ecac573fdb515180800000000000000
+      internalID: -9128413955438629664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 9d67b9ebb8b8f4e4c9aeb7adc2385b8b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Cars_lvl4_black: 1148430634240565737
+      Cars_lvl4_part2_0: -1673259158029414336
+      Cars_lvl4_part2_10: -7036284614752628330
+      Cars_lvl4_part2_11: -6215444424285499939
+      Cars_lvl4_part2_12: -7247403633662806637
+      Cars_lvl4_part2_13: -4872566232463119452
+      Cars_lvl4_part2_14: 2189630123712061925
+      Cars_lvl4_part2_2: -484126070739074378
+      Cars_lvl4_part2_3: 8758778671862389391
+      Cars_lvl4_part2_4: -7688306465567158949
+      Cars_lvl4_part2_5: -4372660507716897686
+      Cars_lvl4_part2_6: 1145182686197129885
+      Cars_lvl4_part2_9: -3361843776645172032
+      Cars_lvl4_white: -1292076299238896851
+      Cars_lvl4_yellow: -9128413955438629664
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

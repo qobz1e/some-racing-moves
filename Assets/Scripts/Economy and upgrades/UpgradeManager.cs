@@ -38,12 +38,7 @@ public class UpgradeManager : MonoBehaviour
 
     private void Awake()
     {
-        speed.level = PlayerProfile.SpeedLevel;
-        lapMoney.level = PlayerProfile.LapMoneyLevel;
-        driftMoney.level = PlayerProfile.DriftMoneyLevel;
-        passiveIncome.level = PlayerProfile.PassiveIncomeLevel;
-        nitro.level = PlayerProfile.NitroLevel;
-        aerodynamics.level = PlayerProfile.AerodynamicsLevel;
+        Refresh();
 
         ApplyUpgrades();
     }
@@ -201,14 +196,26 @@ public class UpgradeManager : MonoBehaviour
         Debug.Log(debugText);
     }
 
+    public void Refresh()
+    {
+        speed.level = PlayerProfile.Current.SpeedLevel;
+        lapMoney.level = PlayerProfile.Current.LapMoneyLevel;
+        driftMoney.level = PlayerProfile.Current.DriftMoneyLevel;
+        passiveIncome.level = PlayerProfile.Current.PassiveIncomeLevel;
+        nitro.level = PlayerProfile.Current.NitroLevel;
+        aerodynamics.level = PlayerProfile.Current.AerodynamicsLevel;
+
+        ApplyUpgrades();
+    }
+
     void SyncProfile()
     {
-        PlayerProfile.SpeedLevel = speed.level;
-        PlayerProfile.LapMoneyLevel = lapMoney.level;
-        PlayerProfile.DriftMoneyLevel = driftMoney.level;
-        PlayerProfile.PassiveIncomeLevel = passiveIncome.level;
-        PlayerProfile.NitroLevel = nitro.level;
-        PlayerProfile.AerodynamicsLevel = aerodynamics.level;
+        PlayerProfile.Current.SpeedLevel = speed.level;
+        PlayerProfile.Current.LapMoneyLevel = lapMoney.level;
+        PlayerProfile.Current.DriftMoneyLevel = driftMoney.level;
+        PlayerProfile.Current.PassiveIncomeLevel = passiveIncome.level;
+        PlayerProfile.Current.NitroLevel = nitro.level;
+        PlayerProfile.Current.AerodynamicsLevel = aerodynamics.level;
 
         SaveSystem.Save();
     }

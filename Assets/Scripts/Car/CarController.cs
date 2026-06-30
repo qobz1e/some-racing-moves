@@ -35,11 +35,11 @@ public class CarController : MonoBehaviour
         Data.stats.traction;
 
     float SpeedMultiplier => isPlayer
-        ? 1f + PlayerProfile.SpeedLevel * 0.05f
+        ? 1f + PlayerProfile.Current.SpeedLevel * 0.05f
         : 1f;
 
     float DragReduce => isPlayer
-        ? PlayerProfile.AerodynamicsLevel * 0.02f
+        ? PlayerProfile.Current.AerodynamicsLevel * 0.02f
         : 0.2f;
 
     public float MaxSpeed => MaxForwardSpeed * SpeedMultiplier;
@@ -67,8 +67,8 @@ public class CarController : MonoBehaviour
     [SerializeField] private float offRoadDrag = 0.8f;
 
     float NitroCapacity => isPlayer
-        ? (PlayerProfile.NitroLevel > 0
-            ? 0.5f + PlayerProfile.NitroLevel / 2f
+        ? (PlayerProfile.Current.NitroLevel > 0
+            ? 0.5f + PlayerProfile.Current.NitroLevel / 2f
             : 0f)
         : 0f;
 
