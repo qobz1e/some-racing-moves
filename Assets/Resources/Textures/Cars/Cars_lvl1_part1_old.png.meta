@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 66816ae0c5c99e0428b4e54d634045ac
+guid: 379a9e88a7812d74da11f5fca9d689e3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1280478300385959706
-    second: Cars_lvl1_part1_0
+      213: -1924026555382668530
+    second: Cars_lvl1_part1_old_0
   - first:
-      213: -186418556173460460
-    second: Cars_lvl1_part1_1
+      213: 2179766875268209186
+    second: Cars_lvl1_part1_old_1
   - first:
-      213: 970055333105417166
-    second: Cars_lvl1_part1_2
+      213: -593274971632415897
+    second: Cars_lvl1_part1_old_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -106,67 +106,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Cars_lvl1_blue
+      name: Cars_lvl1_part1_old_0
       rect:
         serializedVersion: 2
-        x: 97
-        y: 153
-        width: 388
-        height: 760
+        x: 2
+        y: 0
+        width: 502
+        height: 644
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a1fd91dda3c25c110800000000000000
-      internalID: 1280478300385959706
+      spriteID: e036ff3ba0c7c45e0800000000000000
+      internalID: -1924026555382668530
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Cars_lvl1_red
+      name: Cars_lvl1_part1_old_1
       rect:
         serializedVersion: 2
-        x: 574
-        y: 153
-        width: 404
-        height: 760
+        x: 524
+        y: 0
+        width: 438
+        height: 638
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 41c5db39f45b96df0800000000000000
-      internalID: -186418556173460460
+      spriteID: 22a56859c66104e10800000000000000
+      internalID: 2179766875268209186
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Cars_lvl1_lime
+      name: Cars_lvl1_part1_old_2
       rect:
         serializedVersion: 2
-        x: 1056
-        y: 153
-        width: 398
-        height: 760
+        x: 982
+        y: 3
+        width: 463
+        height: 635
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ecbb8369f24567d00800000000000000
-      internalID: 970055333105417166
+      spriteID: 76b48bd7e8344c7f0800000000000000
+      internalID: -593274971632415897
       vertices: []
       indices: 
       edges: []
@@ -175,7 +175,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 0fa1308478b9041498c5486a29425c8a
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -185,10 +185,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Cars_lvl1_blue: 1280478300385959706
-      Cars_lvl1_lime: 970055333105417166
-      Cars_lvl1_red: -186418556173460460
-      l: -186418556173460460
+      Cars_lvl1_part1_old_0: -1924026555382668530
+      Cars_lvl1_part1_old_1: 2179766875268209186
+      Cars_lvl1_part1_old_2: -593274971632415897
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

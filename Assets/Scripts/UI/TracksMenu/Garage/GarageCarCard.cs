@@ -22,20 +22,30 @@ public class GarageCarCard : MonoBehaviour
     {
         CarData car = garage.Cars[carIndex];
 
-        icon.sprite = car.icon;
+        GameObject prefab =
+            car.prefabs[
+                PlayerProfile.Colors[carIndex].CurrentColor
+            ];
+
+        SpriteRenderer sr =
+            prefab.GetComponentInChildren<SpriteRenderer>();
+
         title.text = car.carName;
 
         if (!garage.IsOwned(carIndex))
         {
             buttonText.text = $"Buy ({car.price})";
+            icon.sprite = car.icon;
         }
         else if (garage.IsSelected(carIndex))
         {
             buttonText.text = "Chosen";
+            icon.sprite = sr.sprite;
         }
         else
         {
             buttonText.text = "Owned";
+            icon.sprite = sr.sprite;
         }
     }
 

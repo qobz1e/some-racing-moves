@@ -8,6 +8,8 @@ public class UpgradeHUD : MonoBehaviour
     [SerializeField] private UpgradeManager upgradeManager;
     [SerializeField] private GarageCoinsUI coinsUIGarage;
     [SerializeField] private GarageCoinsUI coinsUITracksMenu;
+    [SerializeField] private GarageCoinsUI coinsUICarsGarage;
+    [SerializeField] private GarageCoinsUI coinsUIColorsMenu;
 
     [System.Serializable]
     public class UpgradeUI
@@ -110,6 +112,8 @@ public class UpgradeHUD : MonoBehaviour
 
         coinsUIGarage.Refresh();
         coinsUITracksMenu.Refresh();
+        coinsUICarsGarage.Refresh();
+        coinsUIColorsMenu.Refresh();
     }
 
     private void UpdateButton(

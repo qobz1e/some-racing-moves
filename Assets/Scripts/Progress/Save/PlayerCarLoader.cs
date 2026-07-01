@@ -12,8 +12,11 @@ public class PlayerCarLoader : MonoBehaviour
 
     public void Refresh()
     {
-        foreach (Transform child in visualRoot)
-            Destroy(child.gameObject);
+        CarVisual oldVisual =
+            visualRoot.GetComponentInChildren<CarVisual>();
+
+        if (oldVisual != null)
+            Destroy(oldVisual.gameObject);
 
         CarData data =
             database.cars[PlayerProfile.CurrentCarLevel];

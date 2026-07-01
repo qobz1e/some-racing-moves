@@ -10,36 +10,49 @@ public class GarageUI : MonoBehaviour
     [SerializeField] private GameObject tracksMenu;
     [SerializeField] private GameObject garageMenu;
     [SerializeField] private GameObject carsShop;
-
-    void OnEnable()
-    {
-        RefreshImage();
-    }
+    [SerializeField] private GameObject colorsMenu;
 
     public void OpenGarage()
     {
         tracksMenu.SetActive(false);
         carsShop.SetActive(false);
+        colorsMenu.SetActive(false);
         garageMenu.SetActive(true);
-        RefreshImage();
+
+        RefreshImages();
     }
 
     public void OpenTracksMenu()
     {
         garageMenu.SetActive(false);
         carsShop.SetActive(false);
+        colorsMenu.SetActive(false);
         tracksMenu.SetActive(true);
-        RefreshImage();
+
+        RefreshImages();
     }
 
     public void OpenCarsShop()
     {
         tracksMenu.SetActive(false);
         garageMenu.SetActive(false);
+        colorsMenu.SetActive(false);
         carsShop.SetActive(true);
+
+        RefreshImages();
     }
 
-    private void RefreshImage()
+    public void OpenColorsMenu()
+    {
+        tracksMenu.SetActive(false);
+        garageMenu.SetActive(false);
+        carsShop.SetActive(false);
+        colorsMenu.SetActive(true);
+
+        RefreshImages();
+    }
+
+    private void RefreshImages()
     {
         GameObject prefab =
             garage.Cars[
@@ -54,5 +67,7 @@ public class GarageUI : MonoBehaviour
         carImageTracksMenu.sprite = sprite;
 
         carImageGarage.sprite = sprite;
+
+        garage.RefreshAllCards();
     }
 }

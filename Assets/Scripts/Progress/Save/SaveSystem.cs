@@ -10,10 +10,6 @@ public static class SaveSystem
             "CurrentCarLevel",
             PlayerProfile.CurrentCarLevel);
 
-        PlayerPrefs.SetInt(
-            "CurrentCarColor",
-            PlayerProfile.CurrentCarColor);
-
         for (int i = 0; i < PlayerProfile.OwnedCars.Length; i++)
         {
             PlayerPrefs.SetInt(
@@ -44,6 +40,16 @@ public static class SaveSystem
                 car.NitroLevel);
         }
 
+        for (int car = 0; car < PlayerProfile.Colors.Length; car++)
+        {
+            for (int color = 0; color < PlayerProfile.Colors[car].OwnedColors.Length; color++)
+            {
+                PlayerPrefs.SetInt(
+                    $"OwnedColor_{car}_{color}",
+                    PlayerProfile.Colors[car].OwnedColors[color] ? 1 : 0);
+            }
+        }
+
         PlayerPrefs.Save();
     }
 
@@ -54,9 +60,6 @@ public static class SaveSystem
 
         PlayerProfile.CurrentCarLevel =
             PlayerPrefs.GetInt("CurrentCarLevel", 0);
-
-        PlayerProfile.CurrentCarColor =
-            PlayerPrefs.GetInt("CurrentCarColor", 0);
 
         for (int i = 0; i < PlayerProfile.OwnedCars.Length; i++)
         {
@@ -87,6 +90,17 @@ public static class SaveSystem
 
             car.NitroLevel =
                 PlayerPrefs.GetInt($"NitroLevel_{i}", 0);
+        }
+
+        for (int car = 0; car < PlayerProfile.Colors.Length; car++)
+        {
+            for (int color = 0; color < PlayerProfile.Colors[car].OwnedColors.Length; color++)
+            {
+                PlayerProfile.Colors[car].OwnedColors[color] =
+                    PlayerPrefs.GetInt(
+                        $"OwnedColor_{car}_{color}",
+                        color == 0 ? 1 : 0) == 1;
+            }
         }
     }
 
