@@ -14,4 +14,13 @@ public class CarColorData
         false,
         false
     };
+
+    public void UnlockStarterColors()
+    {
+        for (int i = 0; i < 6; i++)
+            OwnedColors[i] = true;
+
+        OwnedColors[6] = false;
+        OwnedColors[7] = false;
+    }
 }

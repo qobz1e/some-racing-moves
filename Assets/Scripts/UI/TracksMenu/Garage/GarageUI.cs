@@ -12,6 +12,13 @@ public class GarageUI : MonoBehaviour
     [SerializeField] private GameObject carsShop;
     [SerializeField] private GameObject colorsMenu;
 
+    [SerializeField] private Sprite unknownCarSprite;
+
+    private void OnEnable()
+    {
+        RefreshImages();
+    }
+
     public void OpenGarage()
     {
         tracksMenu.SetActive(false);
@@ -54,6 +61,15 @@ public class GarageUI : MonoBehaviour
 
     private void RefreshImages()
     {
+        if (!PlayerProfile.TutorialCompleted &&
+            PlayerProfile.TutorialStep < (int)TutorialStep.ChooseCar)
+        {
+            carImageTracksMenu.sprite = unknownCarSprite;
+            carImageGarage.sprite = unknownCarSprite;
+
+            return;
+        }
+
         GameObject prefab =
             garage.Cars[
                 PlayerProfile.CurrentCarLevel

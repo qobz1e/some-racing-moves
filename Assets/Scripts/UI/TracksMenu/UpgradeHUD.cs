@@ -38,12 +38,16 @@ public class UpgradeHUD : MonoBehaviour
         aerodynamicsUI.button.onClick.AddListener(BuyAerodynamics);
 
         economy.OnCoinsChanged += OnCoinsChanged;
+        upgradeManager.OnUpgradeChanged += Refresh;
 
         Refresh();
     }
 
     private void OnDestroy()
     {
+        if (upgradeManager != null)
+            upgradeManager.OnUpgradeChanged -= Refresh;
+
         if (economy != null)
             economy.OnCoinsChanged -= OnCoinsChanged;
     }

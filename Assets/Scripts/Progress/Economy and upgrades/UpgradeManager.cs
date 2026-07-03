@@ -36,6 +36,8 @@ public class UpgradeManager : MonoBehaviour
 
     public float throttleDecrease;
 
+    public System.Action OnUpgradeChanged;
+
     private void Awake()
     {
         Refresh();
@@ -218,5 +220,7 @@ public class UpgradeManager : MonoBehaviour
         PlayerProfile.Current.AerodynamicsLevel = aerodynamics.level;
 
         SaveSystem.Save();
+
+        OnUpgradeChanged?.Invoke();
     }
 }

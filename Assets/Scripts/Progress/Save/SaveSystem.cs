@@ -4,6 +4,14 @@ public static class SaveSystem
 {
     public static void Save()
     {
+        PlayerPrefs.SetInt(
+            "TutorialStep",
+            PlayerProfile.TutorialStep);
+
+        PlayerPrefs.SetInt(
+            "TutorialCompleted",
+            PlayerProfile.TutorialCompleted ? 1 : 0);
+
         PlayerPrefs.SetInt("Coins", PlayerProfile.Coins);
 
         PlayerPrefs.SetInt(
@@ -48,6 +56,10 @@ public static class SaveSystem
                     $"OwnedColor_{car}_{color}",
                     PlayerProfile.Colors[car].OwnedColors[color] ? 1 : 0);
             }
+
+            PlayerPrefs.SetInt(
+                $"CurrentColor_{car}",
+                PlayerProfile.Colors[car].CurrentColor);
         }
 
         PlayerPrefs.Save();
@@ -55,6 +67,12 @@ public static class SaveSystem
 
     public static void Load()
     {
+        PlayerProfile.TutorialStep =
+            PlayerPrefs.GetInt("TutorialStep", 0);
+
+        PlayerProfile.TutorialCompleted =
+            PlayerPrefs.GetInt("TutorialCompleted", 0) == 1;
+
         PlayerProfile.Coins =
             PlayerPrefs.GetInt("Coins", 0);
 
@@ -101,7 +119,12 @@ public static class SaveSystem
                         $"OwnedColor_{car}_{color}",
                         color == 0 ? 1 : 0) == 1;
             }
+
+            PlayerProfile.Colors[car].CurrentColor =
+                PlayerPrefs.GetInt($"CurrentColor_{car}", 0);
         }
+
+        PlayerProfile.ApplyDefaultUnlocks();
     }
 
     public static void DeleteRaceResults()

@@ -14,7 +14,7 @@ public class TrackSelectMenu : MonoBehaviour
     {
         tracks = Resources.LoadAll<TrackDataMenu>("Tracks");
 
-        for (int i = 0; i < tracks.Length; i++)
+        for (int i = 0; i < buttons.Length; i++)
             buttons[i].Setup(tracks[i]);
     }
 

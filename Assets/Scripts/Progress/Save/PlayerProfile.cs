@@ -1,5 +1,9 @@
 public static class PlayerProfile
 {
+    public static int TutorialStep;
+
+    public static bool TutorialCompleted;
+
     public static int Coins;
 
     public static int CurrentCarLevel;
@@ -51,6 +55,11 @@ public static class PlayerProfile
             ? 0
             : 10 + (Current.PassiveIncomeLevel - 1) * 5;
 
+    public static void ApplyDefaultUnlocks()
+    {
+        Colors[0].UnlockStarterColors();
+    }
+
     public static void ResetProgress()
     {
         Coins = 0;
@@ -66,7 +75,16 @@ public static class PlayerProfile
         for (int i = 0; i < Colors.Length; i++)
             Colors[i] = new CarColorData();
 
+        ApplyDefaultUnlocks();
+
         SaveSystem.DeleteRaceResults();
+        SaveSystem.Save();
+    }
+
+    public static void RestartTutorial()
+    {
+        TutorialCompleted = false;
+
         SaveSystem.Save();
     }
 }
