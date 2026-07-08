@@ -54,7 +54,7 @@ public class DriftManager : MonoBehaviour
                     Mathf.RoundToInt(
                         baseReward *
                         (1f + Mathf.Floor(combo / 5f)) *
-                        PlayerProfile.DriftMoneyMultiplier
+                        PlayerUpgrades.DriftMoneyMultiplier
                     );
 
                 economy.AddCoins(reward);

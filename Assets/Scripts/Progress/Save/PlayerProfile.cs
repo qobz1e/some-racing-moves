@@ -44,17 +44,6 @@ public static class PlayerProfile
     public static int CurrentCarColor =>
         CurrentColors.CurrentColor;
 
-    public static float LapMoneyMultiplier =>
-        1f + Current.LapMoneyLevel * 0.5f;
-
-    public static float DriftMoneyMultiplier =>
-        1f + Current.DriftMoneyLevel * 0.3f;
-
-    public static int PassiveIncomeAmount =>
-        Current.PassiveIncomeLevel <= 0
-            ? 0
-            : 10 + (Current.PassiveIncomeLevel - 1) * 5;
-
     public static void ApplyDefaultUnlocks()
     {
         Colors[0].UnlockStarterColors();
@@ -74,6 +63,10 @@ public static class PlayerProfile
 
         for (int i = 0; i < Colors.Length; i++)
             Colors[i] = new CarColorData();
+
+        PlayerUpgrades.LapMoneyLevel = 0;
+        PlayerUpgrades.DriftMoneyLevel = 0;
+        PlayerUpgrades.PassiveIncomeLevel = 0;
 
         ApplyDefaultUnlocks();
 

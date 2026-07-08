@@ -34,7 +34,9 @@ public class GarageColorManager : MonoBehaviour
         if (PlayerProfile.Coins < price)
             return false;
 
-        economy.AddCoins(-price);
+        if (!economy.SpendCoins(price))
+            return false;
+
         upgradeManager.Refresh();
 
         PlayerProfile

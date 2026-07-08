@@ -15,12 +15,15 @@ public class UpgradeManager : MonoBehaviour
     }
 
     [Header("Upgrades")]
-    public UpgradeData speed;
+    public UpgradeData engine;
+    public UpgradeData turbo;
+    public UpgradeData tires;
+    public UpgradeData aerodynamics;
+    public UpgradeData nitro;
+
     public UpgradeData lapMoney;
     public UpgradeData driftMoney;
     public UpgradeData passiveIncome;
-    public UpgradeData nitro;
-    public UpgradeData aerodynamics;
 
     [Header("Cost Scaling")]
     public float costMultiplier = 1.6f;
@@ -56,17 +59,21 @@ public class UpgradeManager : MonoBehaviour
         );
     }
 
-    public int GetSpeedCost() => GetCost(speed.baseCost, speed.level);
+    public int GetEngineCost() => GetCost(engine.baseCost, engine.level);
+
+    public int GetTurboCost() => GetCost(turbo.baseCost, turbo.level);
+
+    public int GetTiresCost() => GetCost(tires.baseCost, tires.level);
+
+    public int GetAerodynamicsCost() => GetCost(aerodynamics.baseCost, aerodynamics.level);
+
+    public int GetNitroCost() => GetCost(nitro.baseCost, nitro.level);
 
     public int GetLapMoneyCost() => GetCost(lapMoney.baseCost, lapMoney.level);
 
     public int GetDriftMoneyCost() => GetCost(driftMoney.baseCost, driftMoney.level);
 
     public int GetPassiveIncomeCost() => GetCost(passiveIncome.baseCost, passiveIncome.level);
-
-    public int GetNitroCost() => GetCost(nitro.baseCost, nitro.level);
-
-    public int GetAerodynamicsCost() => GetCost(aerodynamics.baseCost, aerodynamics.level);
 
     // =========================
     // BUY METHODS
@@ -91,13 +98,53 @@ public class UpgradeManager : MonoBehaviour
         return true;
     }
 
-    public void BuySpeedUpgrade()
+    public void BuyEngineUpgrade()
     {
         TryBuy(
-            ref speed.level,
-            speed.maxLevel,
-            GetSpeedCost(),
-            "Speed"
+            ref engine.level,
+            engine.maxLevel,
+            GetEngineCost(),
+            "Engine"
+        );
+    }
+
+    public void BuyTurboUpgrade()
+    {
+        TryBuy(
+            ref turbo.level,
+            turbo.maxLevel,
+            GetTurboCost(),
+            "Turbo"
+        );
+    }
+
+    public void BuyTiresUpgrade()
+    {
+        TryBuy(
+            ref tires.level,
+            tires.maxLevel,
+            GetTiresCost(),
+            "Tires"
+        );
+    }
+
+    public void BuyAerodynamicsUpgrade()
+    {
+        TryBuy(
+            ref aerodynamics.level,
+            aerodynamics.maxLevel,
+            GetAerodynamicsCost(),
+            "Aerodynamics"
+        );
+    }
+
+    public void BuyNitroUpgrade()
+    {
+        TryBuy(
+            ref nitro.level,
+            nitro.maxLevel,
+            GetNitroCost(),
+            "Nitro"
         );
     }
 
@@ -131,36 +178,12 @@ public class UpgradeManager : MonoBehaviour
         );
     }
 
-    public void BuyNitroUpgrade()
-    {
-        TryBuy(
-            ref nitro.level,
-            nitro.maxLevel,
-            GetNitroCost(),
-            "Nitro"
-        );
-    }
-
-    public void BuyAerodynamicsUpgrade()
-    {
-        TryBuy(
-            ref aerodynamics.level,
-            aerodynamics.maxLevel,
-            GetAerodynamicsCost(),
-            "Aerodynamics"
-        );
-    }
-
     // =========================
     // APPLY
     // =========================
 
     private void ApplyUpgrades()
     {
-        // +5% speed per level
-        speedMultiplier =
-            1f + speed.level * 0.05f;
-
         // +50 coins per lap
         lapMoneyMultiplier =
             1f + lapMoney.level * 0.5f;
@@ -175,49 +198,42 @@ public class UpgradeManager : MonoBehaviour
                 ? 0
                 : 10 + (passiveIncome.level - 1) * 5;
 
-        // +0.5 s nitro per level
-        nitroCapacity = nitro.level > 0 ? 0.5f + nitro.level / 2f : 0;
-
-        // -0.02 throttle drag per level
-        throttleDecrease = aerodynamics.level * 0.02f;
-
         string debugText =
-            $"Speed x{speedMultiplier} | " +
             $"Lap x{lapMoneyMultiplier} | " +
             $"Drift x{driftMoneyMultiplier}";
 
         if (passiveIncome.level > 0)
             debugText += $" | Passive {passiveIncomeAmount} coins";
 
-        if (nitro.level > 0)
-            debugText += $" | Nitro {nitroCapacity} s";
-
-        if (aerodynamics.level > 0)
-            debugText += $" | Drag reduced by {aerodynamics.level * 4}%";
-
         Debug.Log(debugText);
     }
 
     public void Refresh()
     {
-        speed.level = PlayerProfile.Current.SpeedLevel;
-        lapMoney.level = PlayerProfile.Current.LapMoneyLevel;
-        driftMoney.level = PlayerProfile.Current.DriftMoneyLevel;
-        passiveIncome.level = PlayerProfile.Current.PassiveIncomeLevel;
-        nitro.level = PlayerProfile.Current.NitroLevel;
+        lapMoney.level = PlayerUpgrades.LapMoneyLevel;
+        driftMoney.level = PlayerUpgrades.DriftMoneyLevel;
+        passiveIncome.level = PlayerUpgrades.PassiveIncomeLevel;
+
+        engine.level = PlayerProfile.Current.EngineLevel;
+        turbo.level = PlayerProfile.Current.TurboLevel;
+        tires.level = PlayerProfile.Current.TiresLevel;
         aerodynamics.level = PlayerProfile.Current.AerodynamicsLevel;
+        nitro.level = PlayerProfile.Current.NitroLevel;
 
         ApplyUpgrades();
     }
 
     void SyncProfile()
     {
-        PlayerProfile.Current.SpeedLevel = speed.level;
-        PlayerProfile.Current.LapMoneyLevel = lapMoney.level;
-        PlayerProfile.Current.DriftMoneyLevel = driftMoney.level;
-        PlayerProfile.Current.PassiveIncomeLevel = passiveIncome.level;
-        PlayerProfile.Current.NitroLevel = nitro.level;
+        PlayerUpgrades.LapMoneyLevel = lapMoney.level;
+        PlayerUpgrades.DriftMoneyLevel = driftMoney.level;
+        PlayerUpgrades.PassiveIncomeLevel = passiveIncome.level;
+
+        PlayerProfile.Current.EngineLevel = engine.level;
+        PlayerProfile.Current.TurboLevel = turbo.level;
+        PlayerProfile.Current.TiresLevel = tires.level;
         PlayerProfile.Current.AerodynamicsLevel = aerodynamics.level;
+        PlayerProfile.Current.NitroLevel = nitro.level;
 
         SaveSystem.Save();
 

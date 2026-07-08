@@ -23,15 +23,18 @@ public class EconomyManager : MonoBehaviour
 
     void Update()
     {
+        if (RaceManager.Instance == null)
+            return;
+
         passiveIncomeTimer += Time.deltaTime;
 
         if (passiveIncomeTimer >= 3f)
         {
             passiveIncomeTimer = 0f;
 
-            if (PlayerProfile.PassiveIncomeAmount > 0)
+            if (PlayerUpgrades.PassiveIncomeAmount > 0)
             {
-                AddCoins(PlayerProfile.PassiveIncomeAmount);
+                AddCoins(PlayerUpgrades.PassiveIncomeAmount);
             }
         }
     }
@@ -45,7 +48,7 @@ public class EconomyManager : MonoBehaviour
     private void AwardLap()
     {
         int reward = Mathf.RoundToInt(
-            coinsPerLap * PlayerProfile.LapMoneyMultiplier
+            coinsPerLap * PlayerUpgrades.LapMoneyMultiplier
         );
 
         AddCoins(reward);
@@ -56,7 +59,12 @@ public class EconomyManager : MonoBehaviour
     {
         PlayerProfile.Coins += amount;
 
-        OnCoinsChanged?.Invoke(PlayerProfile.Coins, amount);
+        OnCoinsChanged?.Invoke(
+            PlayerProfile.Coins,
+            amount
+        );
+
+        CoinNotifier.Notify(amount);
 
         SaveSystem.Save();
 
@@ -76,6 +84,25 @@ public class EconomyManager : MonoBehaviour
 
             popup.Setup(amount);
         }
+    }
+
+    public bool SpendCoins(int amount)
+    {
+        if (Coins < amount)
+            return false;
+
+        PlayerProfile.Coins -= amount;
+
+        OnCoinsChanged?.Invoke(
+            PlayerProfile.Coins,
+            -amount
+        );
+
+        CoinNotifier.Notify(-amount);
+
+        SaveSystem.Save();
+
+        return true;
     }
 }
 

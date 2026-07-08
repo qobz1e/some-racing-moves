@@ -7,4 +7,6 @@ public class CarStats
     public float reverseSpeed;
 
     public float traction;
+
+    public float throttleDecrease = 0f;
 }

@@ -31,19 +31,27 @@ public class CarController : MonoBehaviour
     float ReverseSpeed =>
         Data.stats.reverseSpeed;
 
-    float Traction =>
-        Data.stats.traction;
-
     float SpeedMultiplier => isPlayer
-        ? 1f + PlayerProfile.Current.SpeedLevel * 0.05f
+        ? 1f + PlayerProfile.Current.EngineLevel * 0.05f
         : 1f;
+
+    float TurboMultiplier => isPlayer
+        ? 1f + PlayerProfile.Current.TurboLevel * 0.05f
+        : 1f;
+
+    float Accel => Acceleration * TurboMultiplier;
+
+    float Traction => isPlayer
+        ? Data.stats.traction *
+          (1f + PlayerProfile.Current.TiresLevel * 0.1f)
+        : Data.stats.traction;
 
     float DragReduce => isPlayer
         ? PlayerProfile.Current.AerodynamicsLevel * 0.02f
-        : 0.2f;
+        : 0f;
 
     public float MaxSpeed => MaxForwardSpeed * SpeedMultiplier;
-    float Accel => Acceleration * SpeedMultiplier;
+
     float dragReduce => DragReduce;
 
     public bool IsReversing { get; private set; }

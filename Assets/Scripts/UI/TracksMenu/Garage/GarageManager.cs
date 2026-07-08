@@ -7,8 +7,9 @@ public class GarageManager : MonoBehaviour
 
     [SerializeField] private EconomyManager economy;
     [SerializeField] private UpgradeManager upgradeManager;
-    [SerializeField] private UpgradeHUD upgradeHUD;
     [SerializeField] private GarageColorManager colorManager;
+
+    public System.Action OnSelectedCarChanged;
 
     public CarData[] Cars => cars;
 
@@ -29,13 +30,12 @@ public class GarageManager : MonoBehaviour
         if (PlayerProfile.OwnedCars[index])
             return true;
 
-        if (PlayerProfile.Coins < car.price)
+        if (!economy.SpendCoins(car.price))
             return false;
 
-        PlayerProfile.Coins -= car.price;
-        upgradeManager.Refresh();
-
         PlayerProfile.OwnedCars[index] = true;
+
+        upgradeManager.Refresh();
 
         SaveSystem.Save();
 
@@ -52,8 +52,9 @@ public class GarageManager : MonoBehaviour
         SaveSystem.Save();
 
         upgradeManager.Refresh();
-        upgradeHUD.Refresh();
         colorManager.RefreshAllCards();
+
+        OnSelectedCarChanged?.Invoke();
     }
 
     public void RefreshAllCards()

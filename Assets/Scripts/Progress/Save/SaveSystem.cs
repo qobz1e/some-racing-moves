@@ -29,20 +29,17 @@ public static class SaveSystem
         {
             CarUpgradeData car = PlayerProfile.Cars[i];
 
-            PlayerPrefs.SetInt($"SpeedLevel_{i}",
-                car.SpeedLevel);
+            PlayerPrefs.SetInt($"EngineLevel_{i}",
+                car.EngineLevel);
+
+            PlayerPrefs.SetInt($"TurboLevel_{i}",
+                car.TurboLevel);
+
+            PlayerPrefs.SetInt($"TiresLevel_{i}",
+                car.TiresLevel);
 
             PlayerPrefs.SetInt($"AerodynamicsLevel_{i}",
                 car.AerodynamicsLevel);
-
-            PlayerPrefs.SetInt($"LapMoneyLevel_{i}",
-                car.LapMoneyLevel);
-
-            PlayerPrefs.SetInt($"DriftMoneyLevel_{i}",
-                car.DriftMoneyLevel);
-
-            PlayerPrefs.SetInt($"PassiveIncomeLevel_{i}",
-                car.PassiveIncomeLevel);
 
             PlayerPrefs.SetInt($"NitroLevel_{i}",
                 car.NitroLevel);
@@ -61,6 +58,18 @@ public static class SaveSystem
                 $"CurrentColor_{car}",
                 PlayerProfile.Colors[car].CurrentColor);
         }
+
+        PlayerPrefs.SetInt(
+            "LapMoneyLevel",
+            PlayerUpgrades.LapMoneyLevel);
+
+        PlayerPrefs.SetInt(
+            "DriftMoneyLevel",
+            PlayerUpgrades.DriftMoneyLevel);
+
+        PlayerPrefs.SetInt(
+            "PassiveIncomeLevel",
+            PlayerUpgrades.PassiveIncomeLevel);
 
         PlayerPrefs.Save();
     }
@@ -91,20 +100,17 @@ public static class SaveSystem
         {
             CarUpgradeData car = PlayerProfile.Cars[i];
 
-            car.SpeedLevel =
-                PlayerPrefs.GetInt($"SpeedLevel_{i}", 0);
+            car.EngineLevel =
+                PlayerPrefs.GetInt($"EngineLevel_{i}", 0);
+
+            car.TurboLevel =
+                PlayerPrefs.GetInt($"TurboLevel_{i}", 0);
+
+            car.TiresLevel =
+                PlayerPrefs.GetInt($"TiresLevel_{i}", 0);
 
             car.AerodynamicsLevel =
                 PlayerPrefs.GetInt($"AerodynamicsLevel_{i}", 0);
-
-            car.LapMoneyLevel =
-                PlayerPrefs.GetInt($"LapMoneyLevel_{i}", 0);
-
-            car.DriftMoneyLevel =
-                PlayerPrefs.GetInt($"DriftMoneyLevel_{i}", 0);
-
-            car.PassiveIncomeLevel =
-                PlayerPrefs.GetInt($"PassiveIncomeLevel_{i}", 0);
 
             car.NitroLevel =
                 PlayerPrefs.GetInt($"NitroLevel_{i}", 0);
@@ -123,6 +129,15 @@ public static class SaveSystem
             PlayerProfile.Colors[car].CurrentColor =
                 PlayerPrefs.GetInt($"CurrentColor_{car}", 0);
         }
+
+        PlayerUpgrades.LapMoneyLevel =
+            PlayerPrefs.GetInt("LapMoneyLevel", 0);
+
+        PlayerUpgrades.DriftMoneyLevel =
+            PlayerPrefs.GetInt("DriftMoneyLevel", 0);
+
+        PlayerUpgrades.PassiveIncomeLevel =
+            PlayerPrefs.GetInt("PassiveIncomeLevel", 0);
 
         PlayerProfile.ApplyDefaultUnlocks();
     }

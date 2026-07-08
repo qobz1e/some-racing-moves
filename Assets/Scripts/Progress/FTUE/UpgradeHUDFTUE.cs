@@ -21,11 +21,11 @@ public class UpgradeHUDFTUE : MonoBehaviour
         public Image icon;
     }
 
-    [SerializeField] private UpgradeUI speedUI;
+    [SerializeField] private UpgradeUI engineUI;
 
     private void Start()
     {
-        speedUI.button.onClick.AddListener(BuySpeed);
+        engineUI.button.onClick.AddListener(BuyEngine);
 
         economy.OnCoinsChanged += OnCoinsChanged;
 
@@ -45,14 +45,14 @@ public class UpgradeHUDFTUE : MonoBehaviour
 
     public void Refresh()
     {
-        int speedCost = upgradeManager.GetSpeedCost();
+        int engineCost = upgradeManager.GetEngineCost();
 
         UpdateButton(
-            speedUI,
-            upgradeManager.speed.level,
-            upgradeManager.speed.maxLevel,
-            speedCost,
-            economy.Coins >= speedCost
+            engineUI,
+            upgradeManager.engine.level,
+            upgradeManager.engine.maxLevel,
+            engineCost,
+            economy.Coins >= engineCost
         );
 
         coinsUIGarage.Refresh();
@@ -99,9 +99,9 @@ public class UpgradeHUDFTUE : MonoBehaviour
             ui.priceText.text = cost.ToString();
     }
 
-    private void BuySpeed()
+    private void BuyEngine()
     {
-        upgradeManager.BuySpeedUpgrade();
+        upgradeManager.BuyEngineUpgrade();
         Refresh();
     }
 

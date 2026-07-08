@@ -21,21 +21,27 @@ public class UpgradeHUD : MonoBehaviour
         public Image icon;
     }
 
-    [SerializeField] private UpgradeUI speedUI;
+    [SerializeField] private UpgradeUI engineUI;
+    [SerializeField] private UpgradeUI turboUI;
+    [SerializeField] private UpgradeUI tiresUI;
+    [SerializeField] private UpgradeUI aerodynamicsUI;
+    [SerializeField] private UpgradeUI nitroUI;
+
     [SerializeField] private UpgradeUI lapMoneyUI;
     [SerializeField] private UpgradeUI driftMoneyUI;
     [SerializeField] private UpgradeUI passiveIncomeUI;
-    [SerializeField] private UpgradeUI nitroUI;
-    [SerializeField] private UpgradeUI aerodynamicsUI;
 
     private void Start()
     {
-        speedUI.button.onClick.AddListener(BuySpeed);
+        engineUI.button.onClick.AddListener(BuyEngine);
+        turboUI.button.onClick.AddListener(BuyTurbo);
+        tiresUI.button.onClick.AddListener(BuyTires);
+        aerodynamicsUI.button.onClick.AddListener(BuyAerodynamics);
+        nitroUI.button.onClick.AddListener(BuyNitro);
+
         lapMoneyUI.button.onClick.AddListener(BuyLap);
         driftMoneyUI.button.onClick.AddListener(BuyDrift);
         passiveIncomeUI.button.onClick.AddListener(BuyPassiveIncome);
-        nitroUI.button.onClick.AddListener(BuyNitro);
-        aerodynamicsUI.button.onClick.AddListener(BuyAerodynamics);
 
         economy.OnCoinsChanged += OnCoinsChanged;
         upgradeManager.OnUpgradeChanged += Refresh;
@@ -59,19 +65,54 @@ public class UpgradeHUD : MonoBehaviour
 
     public void Refresh()
     {
-        int speedCost = upgradeManager.GetSpeedCost();
+        int engineCost = upgradeManager.GetEngineCost();
+        int turboCost = upgradeManager.GetTurboCost();
+        int tiresCost = upgradeManager.GetTiresCost();
+        int aerodynamicsCost = upgradeManager.GetAerodynamicsCost();
+        int nitroCost = upgradeManager.GetNitroCost();
+
         int lapCost = upgradeManager.GetLapMoneyCost();
         int driftCost = upgradeManager.GetDriftMoneyCost();
         int passiveIncomeCost = upgradeManager.GetPassiveIncomeCost();
-        int nitroCost = upgradeManager.GetNitroCost();
-        int aerodynamicsCost = upgradeManager.GetAerodynamicsCost();
 
         UpdateButton(
-            speedUI,
-            upgradeManager.speed.level,
-            upgradeManager.speed.maxLevel,
-            speedCost,
-            economy.Coins >= speedCost
+            engineUI,
+            upgradeManager.engine.level,
+            upgradeManager.engine.maxLevel,
+            engineCost,
+            economy.Coins >= engineCost
+        );
+
+        UpdateButton(
+            turboUI,
+            upgradeManager.turbo.level,
+            upgradeManager.turbo.maxLevel,
+            turboCost,
+            economy.Coins >= turboCost
+        );
+
+        UpdateButton(
+            tiresUI,
+            upgradeManager.tires.level,
+            upgradeManager.tires.maxLevel,
+            tiresCost,
+            economy.Coins >= tiresCost
+        );
+
+        UpdateButton(
+            aerodynamicsUI,
+            upgradeManager.aerodynamics.level,
+            upgradeManager.aerodynamics.maxLevel,
+            aerodynamicsCost,
+            economy.Coins >= aerodynamicsCost
+        );
+
+        UpdateButton(
+            nitroUI,
+            upgradeManager.nitro.level,
+            upgradeManager.nitro.maxLevel,
+            nitroCost,
+            economy.Coins >= nitroCost
         );
 
         UpdateButton(
@@ -96,22 +137,6 @@ public class UpgradeHUD : MonoBehaviour
             upgradeManager.passiveIncome.maxLevel,
             passiveIncomeCost,
             economy.Coins >= passiveIncomeCost
-        );
-
-        UpdateButton(
-            nitroUI,
-            upgradeManager.nitro.level,
-            upgradeManager.nitro.maxLevel,
-            nitroCost,
-            economy.Coins >= nitroCost
-        );
-
-        UpdateButton(
-            aerodynamicsUI,
-            upgradeManager.aerodynamics.level,
-            upgradeManager.aerodynamics.maxLevel,
-            aerodynamicsCost,
-            economy.Coins >= aerodynamicsCost
         );
 
         coinsUIGarage.Refresh();
@@ -158,9 +183,33 @@ public class UpgradeHUD : MonoBehaviour
             ui.priceText.text = cost.ToString();
     }
 
-    private void BuySpeed()
+    private void BuyEngine()
     {
-        upgradeManager.BuySpeedUpgrade();
+        upgradeManager.BuyEngineUpgrade();
+        Refresh();
+    }
+
+    private void BuyTurbo()
+    {
+        upgradeManager.BuyTurboUpgrade();
+        Refresh();
+    }
+
+    private void BuyTires()
+    {
+        upgradeManager.BuyTiresUpgrade();
+        Refresh();
+    }
+
+    private void BuyAerodynamics()
+    {
+        upgradeManager.BuyAerodynamicsUpgrade();
+        Refresh();
+    }
+
+    private void BuyNitro()
+    {
+        upgradeManager.BuyNitroUpgrade();
         Refresh();
     }
 
@@ -179,18 +228,6 @@ public class UpgradeHUD : MonoBehaviour
     private void BuyPassiveIncome()
     {
         upgradeManager.BuyPassiveIncomeUpgrade();
-        Refresh();
-    }
-
-    private void BuyNitro()
-    {
-        upgradeManager.BuyNitroUpgrade();
-        Refresh();
-    }
-
-    private void BuyAerodynamics()
-    {
-        upgradeManager.BuyAerodynamicsUpgrade();
         Refresh();
     }
 

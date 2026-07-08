@@ -1,10 +1,9 @@
 [System.Serializable]
 public class CarUpgradeData
 {
-    public int SpeedLevel;
-    public int LapMoneyLevel;
-    public int DriftMoneyLevel;
-    public int PassiveIncomeLevel;
-    public int NitroLevel;
+    public int EngineLevel;
+    public int TurboLevel;
+    public int TiresLevel;
     public int AerodynamicsLevel;
+    public int NitroLevel;
 }
