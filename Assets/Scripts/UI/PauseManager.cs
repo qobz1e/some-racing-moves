@@ -4,7 +4,9 @@ using UnityEngine.SceneManagement;
 
 public class PauseManager : MonoBehaviour
 {
-    [SerializeField] private GameObject pauseUI;
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private GameObject settingsPanel;
+
     [SerializeField] private float returnDelay = 0.5f;
 
     private bool isPaused;
@@ -26,19 +28,33 @@ public class PauseManager : MonoBehaviour
     void Pause()
     {
         isPaused = true;
-        Time.timeScale = 0f;
 
-        if (pauseUI)
-            pauseUI.SetActive(true);
+        Time.timeScale = 0;
+
+        pausePanel.SetActive(true);
+        settingsPanel.SetActive(false);
     }
 
     public void Resume()
     {
         isPaused = false;
-        Time.timeScale = 1f;
 
-        if (pauseUI)
-            pauseUI.SetActive(false);
+        Time.timeScale = 1;
+
+        pausePanel.SetActive(false);
+        settingsPanel.SetActive(false);
+    }
+
+    public void OpenSettings()
+    {
+        pausePanel.SetActive(false);
+        settingsPanel.SetActive(true);
+    }
+
+    public void BackToPause()
+    {
+        settingsPanel.SetActive(false);
+        pausePanel.SetActive(true);
     }
 
     public void BackToTracksMenu()
