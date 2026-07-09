@@ -44,11 +44,11 @@ public class CarController : MonoBehaviour
     float Traction => isPlayer
         ? Data.stats.traction *
           (1f + PlayerProfile.Current.TiresLevel * 0.1f)
-        : Data.stats.traction;
+        : Data.stats.traction + 1f;
 
     float DragReduce => isPlayer
         ? PlayerProfile.Current.AerodynamicsLevel * 0.02f
-        : 0f;
+        : 0.1f;
 
     public float MaxSpeed => MaxForwardSpeed * SpeedMultiplier;
 

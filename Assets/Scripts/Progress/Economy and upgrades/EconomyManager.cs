@@ -2,11 +2,6 @@ using UnityEngine;
 
 public class EconomyManager : MonoBehaviour
 {
-    [SerializeField] private CarController playerCar;
-
-    [Header("Rewards")]
-    public int coinsPerLap = 100;
-
     [SerializeField] private CoinPopup coinPopupPrefab;
     [SerializeField] private RectTransform popupParent;
 
@@ -14,12 +9,6 @@ public class EconomyManager : MonoBehaviour
     public System.Action<int, int> OnCoinsChanged;
 
     private float passiveIncomeTimer;
-
-    private void Start()
-    {
-        if (playerCar != null)
-            playerCar.OnLapCompleted += AwardLap;
-    }
 
     void Update()
     {
@@ -37,22 +26,6 @@ public class EconomyManager : MonoBehaviour
                 AddCoins(PlayerUpgrades.PassiveIncomeAmount);
             }
         }
-    }
-
-    private void OnDestroy()
-    {
-        if (playerCar != null)
-            playerCar.OnLapCompleted -= AwardLap;
-    }
-
-    private void AwardLap()
-    {
-        int reward = Mathf.RoundToInt(
-            coinsPerLap * PlayerUpgrades.LapMoneyMultiplier
-        );
-
-        AddCoins(reward);
-        Debug.Log($"[Economy] Lap! +{reward} → total {Coins}");
     }
 
     public void AddCoins(int amount)
@@ -105,4 +78,3 @@ public class EconomyManager : MonoBehaviour
         return true;
     }
 }
-

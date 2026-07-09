@@ -9,9 +9,9 @@ public class TrackData : MonoBehaviour
     {
         new Vector3(-21, 9),
 
-        new Vector3(-6, 9),
+        new Vector3(-1, 9),
 
-        new Vector3(-6,  -3),
+        new Vector3(-2,  -3),
 
         new Vector3(12,  3),
 
@@ -21,7 +21,7 @@ public class TrackData : MonoBehaviour
 
         new Vector3(21, -12),
 
-        new Vector3(6, -15),
+        new Vector3(4, -15),
 
         new Vector3(-12, -15),
 
