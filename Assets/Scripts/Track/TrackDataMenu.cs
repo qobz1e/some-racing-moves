@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Tracks/Track Data")]
 public class TrackDataMenu : ScriptableObject
 {
+    public int trackIndex;
+
     public string trackName;
     public Sprite previewSprite;
 

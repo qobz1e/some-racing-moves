@@ -17,28 +17,31 @@ public class SoundSettings : MonoBehaviour
     const string CAR = "CarVolume";
     const string MUSIC = "MusicVolume";
 
-    bool initialized;
+    bool initialized = false;
 
     void Start()
     {
-        initialized = false;
+        float master =
+            PlayerPrefs.GetFloat(MASTER, 0.75f);
 
-        masterSlider.SetValueWithoutNotify(
-            PlayerPrefs.GetFloat(MASTER, 1f));
+        float sfx =
+            PlayerPrefs.GetFloat(SFX, 0.75f);
 
-        sfxSlider.SetValueWithoutNotify(
-            PlayerPrefs.GetFloat(SFX, 1f));
+        float car =
+            PlayerPrefs.GetFloat(CAR, 0.75f);
 
-        carSlider.SetValueWithoutNotify(
-            PlayerPrefs.GetFloat(CAR, 1f));
+        float music =
+            PlayerPrefs.GetFloat(MUSIC, 0.75f);
 
-        musicSlider.SetValueWithoutNotify(
-            PlayerPrefs.GetFloat(MUSIC, 1f));
+        masterSlider.SetValueWithoutNotify(master);
+        sfxSlider.SetValueWithoutNotify(sfx);
+        carSlider.SetValueWithoutNotify(car);
+        musicSlider.SetValueWithoutNotify(music);
 
-        SetMaster(masterSlider.value);
-        SetSFX(sfxSlider.value);
-        SetCar(carSlider.value);
-        SetMusic(musicSlider.value);
+        ApplyVolume(MASTER, master);
+        ApplyVolume(SFX, sfx);
+        ApplyVolume(CAR, car);
+        ApplyVolume(MUSIC, music);
 
         initialized = true;
     }

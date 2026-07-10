@@ -8,8 +8,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private bool isPlayer;
 
-    private CarVisual visual;
-    private CarData Data => visual.Data;
+    private CarData Data;
 
     [Header("Movement")]
     [SerializeField] private AnimationCurve accelerationCurve =
@@ -116,11 +115,14 @@ public class CarController : MonoBehaviour
     void Start()
     {
         RaceManager.Instance.RegisterCar(this);
-    }
 
-    void Awake()
-    {
-        visual = GetComponentInChildren<CarVisual>();
+        if (Data == null)
+        {
+            CarVisual visual = GetComponentInChildren<CarVisual>();
+
+            if (visual != null)
+                SetCarData(visual.Data);
+        }
     }
 
     void OnDestroy()
@@ -498,6 +500,8 @@ public class CarController : MonoBehaviour
         nitroInput = value;
     }
 
+    // ─────────────────────────────
+
     public Vector2 VelocityDirection =>
         moveForce.sqrMagnitude > 0.01f
             ? moveForce.normalized
@@ -514,5 +518,12 @@ public class CarController : MonoBehaviour
         float forwardSpeed = Vector2.Dot(moveForce, transform.up);
 
         IsReversing = forwardSpeed < -0.1f;
+    }
+
+    // ─────────────────────────────
+
+    public void SetCarData(CarData data)
+    {
+        Data = data;
     }
 }

@@ -8,6 +8,11 @@ public class MenuController : MonoBehaviour
 
     public string gameScene = "TracksMenu";
 
+    void Start()
+    {
+        MusicManager.Instance.PlayMenu();
+    }
+
     public void Play()
     {
         Time.timeScale = 1f;

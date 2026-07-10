@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class PlayerCarLoader : MonoBehaviour
 {
+    [SerializeField] private CarController carController;
+
     [SerializeField] private CarDatabase database;
     [SerializeField] private Transform visualRoot;
 
@@ -24,5 +26,7 @@ public class PlayerCarLoader : MonoBehaviour
         Instantiate(
             data.prefabs[PlayerProfile.CurrentCarColor],
             visualRoot);
+
+        carController.SetCarData(data);
     }
 }

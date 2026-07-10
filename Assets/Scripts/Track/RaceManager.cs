@@ -31,6 +31,7 @@ public class RaceManager : MonoBehaviour
 
     private void Start()
     {
+        MusicManager.Instance.PlayRace();
         playerCar.OnStartedMoving += StartRace;
     }
 

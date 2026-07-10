@@ -14,6 +14,11 @@ public class GarageUI : MonoBehaviour
 
     [SerializeField] private Sprite unknownCarSprite;
 
+    void Start()
+    {
+        MusicManager.Instance.PlayMenu();
+    }
+
     private void OnEnable()
     {
         RefreshImages();

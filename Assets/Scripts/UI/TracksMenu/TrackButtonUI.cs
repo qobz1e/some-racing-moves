@@ -5,6 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class TrackButtonUI : MonoBehaviour
 {
+    [SerializeField] private Button playButton;
+    [SerializeField] private Image lockIcon;
+    [SerializeField] private CanvasGroup canvasGroup;
+
     [SerializeField] private Image previewImage;
     [SerializeField] private TMP_Text trackNameText;
     [SerializeField] private TMP_Text bestTimeText;
@@ -87,5 +91,29 @@ public class TrackButtonUI : MonoBehaviour
 
         return
             $"{minutes:00}:{seconds:00}.{milliseconds:000}";
+    }
+
+    public void SetLocked(bool locked)
+    {
+        playButton.interactable = !locked;
+
+        if (lockIcon != null)
+        {
+            Color c = lockIcon.color;
+            c.a = locked ? 1f : 0f;
+            lockIcon.color = c;
+        }
+
+        if (bestTimeText != null)
+            bestTimeText.gameObject.SetActive(!locked);
+
+        foreach (Image star in stars)
+        {
+            if (star != null)
+                star.gameObject.SetActive(!locked);
+        }
+
+        if (canvasGroup != null)
+            canvasGroup.alpha = locked ? 0.45f : 1f;
     }
 }

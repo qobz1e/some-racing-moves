@@ -14,6 +14,24 @@ public static class SaveSystem
 
         PlayerPrefs.SetInt("Coins", PlayerProfile.Coins);
 
+        for (int i = 0; i < PlayerProfile.UnlockedTracks.Length; i++)
+        {
+            PlayerPrefs.SetInt(
+                $"TrackUnlocked_{i}",
+                PlayerProfile.UnlockedTracks[i] ? 1 : 0);
+
+            PlayerPrefs.SetInt(
+                $"TrackStars_{i}",
+                PlayerProfile.TrackStars[i]);
+        }
+
+        for (int i = 0; i < PlayerProfile.UnlockedCars.Length; i++)
+        {
+            PlayerPrefs.SetInt(
+                $"CarUnlocked_{i}",
+                PlayerProfile.UnlockedCars[i] ? 1 : 0);
+        }
+
         PlayerPrefs.SetInt(
             "CurrentCarLevel",
             PlayerProfile.CurrentCarLevel);
@@ -84,6 +102,29 @@ public static class SaveSystem
 
         PlayerProfile.Coins =
             PlayerPrefs.GetInt("Coins", 0);
+
+        for (int i = 0; i < PlayerProfile.UnlockedTracks.Length; i++)
+        {
+            bool defaultUnlocked = (i == 0);
+
+            PlayerProfile.UnlockedTracks[i] =
+                PlayerPrefs.GetInt(
+                    $"TrackUnlocked_{i}",
+                    defaultUnlocked ? 1 : 0) == 1;
+
+            PlayerProfile.TrackStars[i] =
+                PlayerPrefs.GetInt(
+                    $"TrackStars_{i}",
+                    0);
+        }
+
+        for (int i = 0; i < PlayerProfile.UnlockedCars.Length; i++)
+        {
+            PlayerProfile.UnlockedCars[i] =
+                PlayerPrefs.GetInt(
+                    $"CarUnlocked_{i}",
+                    i == 0 ? 1 : 0) == 1;
+        }
 
         PlayerProfile.CurrentCarLevel =
             PlayerPrefs.GetInt("CurrentCarLevel", 0);

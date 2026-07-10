@@ -8,6 +8,9 @@ public class GarageCarCard : MonoBehaviour
 
     [SerializeField] private int carIndex;
 
+    [SerializeField] private Image lockIcon;
+    [SerializeField] private CanvasGroup canvasGroup;
+
     [SerializeField] private Image icon;
     [SerializeField] private TMP_Text title;
     [SerializeField] private Button button;
@@ -31,6 +34,25 @@ public class GarageCarCard : MonoBehaviour
             prefab.GetComponentInChildren<SpriteRenderer>();
 
         title.text = car.carName;
+
+        bool unlocked = PlayerProfile.UnlockedCars[carIndex];
+
+        lockIcon.color = new Color(
+            1,
+            1,
+            1,
+            unlocked ? 0f : 1f);
+
+        canvasGroup.alpha = unlocked ? 1f : 0.5f;
+
+        button.interactable = unlocked;
+
+        if (!unlocked)
+        {
+            buttonText.text = "Locked";
+            icon.sprite = car.icon;
+            return;
+        }
 
         if (!garage.IsOwned(carIndex))
         {

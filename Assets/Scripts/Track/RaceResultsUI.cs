@@ -1,9 +1,11 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class RaceResultsUI : MonoBehaviour
 {
+    [Header("Results UI")]
     [SerializeField] private RaceManager raceManager;
     [SerializeField] private GameObject panel;
 
@@ -11,6 +13,12 @@ public class RaceResultsUI : MonoBehaviour
     [SerializeField] private TMP_Text timeText;
     [SerializeField] private TMP_Text bestTimeText;
     [SerializeField] private TMP_Text newBestText;
+
+    [Header("Track Data")]
+    [SerializeField] private TrackDataMenu trackData;
+    [SerializeField] private Image[] stars;
+    [SerializeField] private Sprite filledStar;
+    [SerializeField] private Sprite emptyStar;
 
     private string BestTimeKey =>
         $"BestRaceTime_{SceneManager.GetActiveScene().name}";
@@ -54,6 +62,22 @@ public class RaceResultsUI : MonoBehaviour
             $"Best: {FormatTime(bestTime)}";
 
         newBestText.gameObject.SetActive(isNewBest);
+
+        int stars = CalculateStars(finishTime);
+
+        SetStars(stars);
+
+        PlayerProfile.TrackStars[trackData.trackIndex] =
+            Mathf.Max(
+                PlayerProfile.TrackStars[trackData.trackIndex],
+                stars);
+
+        if (stars == 3)
+        {
+            UnlockNext();
+        }
+
+        SaveSystem.Save();
     }
 
     string FormatTime(float t)
@@ -87,5 +111,41 @@ public class RaceResultsUI : MonoBehaviour
         Time.timeScale = 1f;
 
         SceneManager.LoadScene("TracksMenu");
+    }
+
+    int CalculateStars(float time)
+    {
+        if (time <= trackData.goldTime)
+            return 3;
+
+        if (time <= trackData.silverTime)
+            return 2;
+
+        if (time <= trackData.bronzeTime)
+            return 1;
+
+        return 0;
+    }
+
+    void SetStars(int count)
+    {
+        for (int i = 0; i < stars.Length; i++)
+        {
+            stars[i].sprite =
+                i < count
+                    ? filledStar
+                    : emptyStar;
+        }
+    }
+
+    void UnlockNext()
+    {
+        int next = trackData.trackIndex + 1;
+
+        if (next >= PlayerProfile.UnlockedTracks.Length)
+            return;
+
+        PlayerProfile.UnlockedTracks[next] = true;
+        PlayerProfile.UnlockedCars[next - 1] = true;
     }
 }
