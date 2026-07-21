@@ -8,7 +8,9 @@ public class CarController : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private bool isPlayer;
 
-    private CarData Data;
+    private CarData data;
+
+    public CarData Data => data;
 
     [Header("Movement")]
     [SerializeField] private AnimationCurve accelerationCurve =
@@ -19,16 +21,16 @@ public class CarController : MonoBehaviour
     public float CurrentSpeed => moveForce.magnitude;
 
     float Acceleration =>
-        Data.stats.acceleration;
+        data.stats.acceleration;
 
     float MaxForwardSpeed =>
-        Data.stats.maxSpeed;
+        data.stats.maxSpeed;
 
     float ReverseAcceleration =>
-        Data.stats.reverseAcceleration;
+        data.stats.reverseAcceleration;
 
     float ReverseSpeed =>
-        Data.stats.reverseSpeed;
+        data.stats.reverseSpeed;
 
     float SpeedMultiplier => isPlayer
         ? 1f + PlayerProfile.Current.EngineLevel * 0.05f
@@ -41,9 +43,9 @@ public class CarController : MonoBehaviour
     float Accel => Acceleration * TurboMultiplier;
 
     float Traction => isPlayer
-        ? Data.stats.traction *
+        ? data.stats.traction *
           (1f + PlayerProfile.Current.TiresLevel * 0.1f)
-        : Data.stats.traction + 1f;
+        : data.stats.traction + 1f;
 
     float DragReduce => isPlayer
         ? PlayerProfile.Current.AerodynamicsLevel * 0.02f
@@ -116,7 +118,7 @@ public class CarController : MonoBehaviour
     {
         RaceManager.Instance.RegisterCar(this);
 
-        if (Data == null)
+        if (data == null)
         {
             CarVisual visual = GetComponentInChildren<CarVisual>();
 
@@ -522,8 +524,8 @@ public class CarController : MonoBehaviour
 
     // ─────────────────────────────
 
-    public void SetCarData(CarData data)
+    public void SetCarData(CarData newData)
     {
-        Data = data;
+        data = newData;
     }
 }

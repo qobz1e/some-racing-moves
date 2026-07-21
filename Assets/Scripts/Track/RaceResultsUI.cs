@@ -23,10 +23,13 @@ public class RaceResultsUI : MonoBehaviour
     private string BestTimeKey =>
         $"BestRaceTime_{SceneManager.GetActiveScene().name}";
 
-    public void ShowResults(int place)
+    public void ShowResults()
     {
         float finishTime =
-            raceManager.CurrentRaceTime;
+            RaceManager.Instance.PlayerResult.finishTime;
+
+        int place =
+            RaceManager.Instance.PlayerResult.place;
 
         panel.SetActive(true);
 
@@ -72,11 +75,6 @@ public class RaceResultsUI : MonoBehaviour
                 PlayerProfile.TrackStars[trackData.trackIndex],
                 stars);
 
-        if (stars == 3)
-        {
-            UnlockNext();
-        }
-
         SaveSystem.Save();
     }
 
@@ -113,7 +111,7 @@ public class RaceResultsUI : MonoBehaviour
         SceneManager.LoadScene("TracksMenu");
     }
 
-    int CalculateStars(float time)
+    public int CalculateStars(float time)
     {
         if (time <= trackData.goldTime)
             return 3;
@@ -142,10 +140,30 @@ public class RaceResultsUI : MonoBehaviour
     {
         int next = trackData.trackIndex + 1;
 
-        if (next >= PlayerProfile.UnlockedTracks.Length)
-            return;
+        if (!PlayerProfile.UnlockedTracks[next])
+        { 
+            PlayerProfile.UnlockedTracks[next] = true;
 
-        PlayerProfile.UnlockedTracks[next] = true;
-        PlayerProfile.UnlockedCars[next - 1] = true;
+            UnlockSystem.UnlockTrack(next);
+        }
+
+        int newCar = next - 1;
+
+        if (!PlayerProfile.UnlockedCars[newCar])
+        {
+            PlayerProfile.UnlockedCars[newCar] = true;
+
+            UnlockSystem.UnlockCar(newCar);
+        }
+
+        SaveSystem.Save();
+    }
+
+    public void CheckUnlocks(int stars)
+    {
+        if (stars == 3)
+        {
+            UnlockNext();
+        }
     }
 }

@@ -8,6 +8,8 @@ public class RaceManager : MonoBehaviour
 
     [SerializeField] private CarController playerCar;
     [SerializeField] private EconomyManager economy;
+    [SerializeField] private RaceFlowUI raceFlowUI;
+    [SerializeField] private RaceResultsUI raceResults;
     [SerializeField] private int lapsToFinish = 3;
 
     [SerializeField] private WaypointNode[] waypoints;
@@ -21,6 +23,8 @@ public class RaceManager : MonoBehaviour
 
     public float CurrentRaceTime { get; private set; }
 
+    public RaceResult PlayerResult { get; private set; }
+
     private readonly List<RaceResult> results =
         new List<RaceResult>();
 
@@ -33,6 +37,8 @@ public class RaceManager : MonoBehaviour
     {
         MusicManager.Instance.PlayRace();
         playerCar.OnStartedMoving += StartRace;
+
+        UnlockSystem.Reset();
     }
 
     void Update()
@@ -87,6 +93,7 @@ public class RaceManager : MonoBehaviour
         RaceResult result =
             new RaceResult
             {
+                name = car.gameObject.name,
                 car = car,
                 finishTime = CurrentRaceTime,
                 place = results.Count + 1
@@ -96,12 +103,21 @@ public class RaceManager : MonoBehaviour
 
         if (car.CompareTag("Player"))
         {
-            raceFinished = true;
+            int stars =
+                raceResults.CalculateStars(
+                    CurrentRaceTime
+                );
 
-            car.GetComponent<RaceResultsUI>()
-                .ShowResults(result.place);
+            PlayerResult = result;
 
-            Time.timeScale = 0f;
+            raceResults.CheckUnlocks(stars);
+
+            raceFlowUI.ShowLeaderboard();
+        }
+
+        if (raceFlowUI.gameObject.activeSelf)
+        {
+            raceFlowUI.RefreshLeaderboard();
         }
     }
 
@@ -143,6 +159,7 @@ public class RaceManager : MonoBehaviour
 
 public class RaceResult
 {
+    public string name;
     public CarController car;
     public float finishTime;
     public int place;
